@@ -1,3 +1,17 @@
 body{
     background-image: radial-gradient(at bottom left, rgba(254, 74, 37, 0.8), rgba(38, 22, 144, 0.8));
+    height: 100%;
+    overflow: hidden;
+    margin: 0;
 }
+.setting-container {
+    overflow-y: auto;
+    max-width: 100vw;
+    max-height: 100vh; /* กำหนดความสูงสูงสุดที่ 100% ของหน้าจอ */
+    border-radius: 12px;
+    background-color: #f9f9f9;
+    box-shadow: 0 6px 12px rgba(0, 0, 0, 0.1);
+    transition: box-shadow 0.3s ease-in-out;
+  }
+
+  

@@ -4,19 +4,22 @@ import './Setting.css';
 
 const UsersPage = () => {
   const [users, setUsers] = useState([]);
+  const [departments, setDepartments] = useState([]);  // State สำหรับเก็บข้อมูลแผนก
   const [newUser, setNewUser] = useState({
     username: '',
     password: '',
     first_name: '',
     last_name: '',
     email: '',
-    department_id: ''
+    department_id: '',
+    role: 'user'  // เพิ่ม role ให้ค่าเริ่มต้นเป็น 'user'
   });
   const [editingUserId, setEditingUserId] = useState(null);
   const [editUserData, setEditUserData] = useState({});
 
   useEffect(() => {
     fetchUsers();
+    fetchDepartments();  // เรียกใช้ฟังก์ชันดึงข้อมูลแผนก
   }, []);
 
   const fetchUsers = () => {
@@ -25,12 +28,23 @@ const UsersPage = () => {
       .catch(err => console.error('Error fetching users:', err));
   };
 
+  const fetchDepartments = () => {
+    axios.get('http://localhost:3000/api/departments')  // เรียก API ที่ดึงแผนก
+      .then(res => setDepartments(res.data))
+      .catch(err => console.error('Error fetching departments:', err));
+  };
+
+  const getDepartmentName = (departmentId) => {
+    const department = departments.find(dept => dept.department_id === departmentId);
+    return department ? department.department_name : 'Unknown';  // ถ้าไม่พบให้แสดง 'Unknown'
+  };
+
   const handleAddUser = () => {
     axios.post('http://localhost:3000/api/users', newUser)
       .then(() => {
         alert('User added successfully');
         fetchUsers();
-        setNewUser({ username: '', password: '', first_name: '', last_name: '', email: '', department_id: '' });
+        setNewUser({ username: '', password: '', first_name: '', last_name: '', email: '', department_id: '', role: 'user' });  // รีเซ็ตค่า role
       })
       .catch(err => {
         console.error('Error adding user:', err);
@@ -53,7 +67,7 @@ const UsersPage = () => {
   };
 
   const handleEditClick = (user) => {
-    setEditingUserId(user.User_id);
+    setEditingUserId(user.user_id);
     setEditUserData({ ...user });
   };
 
@@ -72,66 +86,85 @@ const UsersPage = () => {
 
   return (
     <div className='main'>
-    <div className='setting-container'>
-      <h2>Users Management</h2>
+      <div className='setting-container'>
+        <h2>Users Management</h2>
 
-      <div className="setting-container">
-        <h3>Add User</h3>
-        <input type="text" placeholder="Username" value={newUser.username} onChange={(e) => setNewUser({ ...newUser, username: e.target.value })} />
-        <input type="password" placeholder="Password" value={newUser.password} onChange={(e) => setNewUser({ ...newUser, password: e.target.value })} />
-        <input type="text" placeholder="First Name" value={newUser.first_name} onChange={(e) => setNewUser({ ...newUser, first_name: e.target.value })} />
-        <input type="text" placeholder="Last Name" value={newUser.last_name} onChange={(e) => setNewUser({ ...newUser, last_name: e.target.value })} />
-        <input type="email" placeholder="Email" value={newUser.email} onChange={(e) => setNewUser({ ...newUser, email: e.target.value })} />
-        <input type="number" placeholder="Department ID" value={newUser.department_id} onChange={(e) => setNewUser({ ...newUser, department_id: e.target.value })} />
-        <button onClick={handleAddUser}>Add User</button>
-      </div>
+        <div className="add-user">
+          <h3>Add User</h3>
+          <div className='add-user-form'>
+          <input type="text" placeholder="Username" value={newUser.username} onChange={(e) => setNewUser({ ...newUser, username: e.target.value })} />
+          <input type="password" placeholder="Password" value={newUser.password} onChange={(e) => setNewUser({ ...newUser, password: e.target.value })} />
+          <input type="text" placeholder="First Name" value={newUser.first_name} onChange={(e) => setNewUser({ ...newUser, first_name: e.target.value })} />
+          <input type="text" placeholder="Last Name" value={newUser.last_name} onChange={(e) => setNewUser({ ...newUser, last_name: e.target.value })} />
+          <input type="email" placeholder="Email" value={newUser.email} onChange={(e) => setNewUser({ ...newUser, email: e.target.value })} />
+          <input type="number" placeholder="Department ID" value={newUser.department_id} onChange={(e) => setNewUser({ ...newUser, department_id: e.target.value })} />
+          
+          {/* เพิ่ม select สำหรับ role */}
+          <select  className='role' value={newUser.role} onChange={(e) => setNewUser({ ...newUser, role: e.target.value })}>
+            <option value="user">User</option>
+            <option value="admin">Admin</option>
+          </select>
 
-      <h3>Existing Users</h3>
-      <table className="user-table">
-        <thead>
-          <tr>
-            <th>Username</th>
-            <th>Full Name</th>
-            <th>Email</th>
-            <th>Department ID</th>
-            <th>Actions</th>
-          </tr>
-        </thead>
-        <tbody>
-          {users.map(user => (
-            <tr key={user.User_id}>
-              {editingUserId === user.User_id ? (
-                <td colSpan="5">
-                  <input type="text" value={editUserData.username} onChange={(e) => setEditUserData({ ...editUserData, username: e.target.value })} />
-                  <input type="text" value={editUserData.first_name} onChange={(e) => setEditUserData({ ...editUserData, first_name: e.target.value })} />
-                  <input type="text" value={editUserData.last_name} onChange={(e) => setEditUserData({ ...editUserData, last_name: e.target.value })} />
-                  <input type="email" value={editUserData.email} onChange={(e) => setEditUserData({ ...editUserData, email: e.target.value })} />
-                  <input type="number" value={editUserData.department_id} onChange={(e) => setEditUserData({ ...editUserData, department_id: e.target.value })} />
-                  <div className="user-actions">
-                    <button onClick={handleUpdateUser}>Save</button>
-                    <button className="cancel" onClick={() => setEditingUserId(null)}>Cancel</button>
-                  </div>
-                </td>
-              ) : (
-                <>
-                  <td>{user.username}</td>
-                  <td>{user.first_name} {user.last_name}</td>
-                  <td>{user.email}</td>
-                  <td>{user.department_id}</td>
-                  <td>
-                    <button onClick={() => handleEditClick(user)}>Edit</button>
-                    <button onClick={() => handleDeleteUser(user.User_id)}>Delete</button>
-                  </td>
-                </>
-              )}
+          <button  className='editt' onClick={handleAddUser}>Add User</button>
+        </div>
+        </div>
+
+        <div className='data'>
+        <h3>Existing Users</h3>
+        <table className="user-table">
+          <thead>
+            <tr>
+              <th>Username</th>
+              <th>Full Name</th>  {/* This column will show the full name */}
+              <th>Email</th>
+              <th>Department</th> {/* แสดงชื่อแผนก */}
+              <th>Role</th> {/* เพิ่มคอลัมน์ Role */}
+              <th>Actions</th>
             </tr>
-          ))}
-        </tbody>
-      </table>
-    </div>
+          </thead>
+          <tbody className='user-table-body'>
+            {users.map(user => (
+              <tr key={user.user_id}>
+                {editingUserId === user.user_id ? (
+                  <td colSpan="6" >
+                    <input type="text" value={editUserData.username} onChange={(e) => setEditUserData({ ...editUserData, username: e.target.value })} />
+                    <input type="text" value={editUserData.first_name} onChange={(e) => setEditUserData({ ...editUserData, first_name: e.target.value })} />
+                    <input type="text" value={editUserData.last_name} onChange={(e) => setEditUserData({ ...editUserData, last_name: e.target.value })} />
+                    <input type="email" value={editUserData.email} onChange={(e) => setEditUserData({ ...editUserData, email: e.target.value })} />
+                    <input type="number" value={editUserData.department_id} onChange={(e) => setEditUserData({ ...editUserData, department_id: e.target.value })} />
+
+                    <select value={editUserData.role} onChange={(e) => setEditUserData({ ...editUserData, role: e.target.value })}>
+                      <option value="user">User</option>
+                      <option value="admin">Admin</option>
+                    </select>
+
+                    <div className="user-actions">
+                      <button onClick={handleUpdateUser}>Save</button>
+                      <button className="cancel" onClick={() => setEditingUserId(null)}>Cancel</button>
+                    </div>
+                  </td>
+                ) : (
+                  <>
+                    <td>{user.username}</td>
+                    {/* Combine first name and last name */}
+                    <td>{user.first_name} {user.last_name}</td>  {/* Full name displayed here */}
+                    <td>{user.email}</td>
+                    <td>{getDepartmentName(user.department_id)}</td> {/* แสดงชื่อแผนก */}
+                    <td>{user.role}</td>
+                    <td>
+                      <button className='edit' onClick={() => handleEditClick(user)}>Edit</button>
+                      <button className='delete' onClick={() => handleDeleteUser(user.user_id)}>Delete</button>
+                    </td>
+                  </>
+                )}
+              </tr>
+            ))}
+          </tbody>
+        </table>
+        </div>
+      </div>
     </div>
   );
-  
 };
 
 export default UsersPage;

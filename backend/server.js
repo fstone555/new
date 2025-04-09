@@ -14,6 +14,9 @@ const swaggerUi = require('swagger-ui-express');  // นำเข้า swagger-
 const app = express();
 const port = 3000;
 
+
+
+
 // อ่านค่า secretKey จาก .env
 const secretKey = process.env.JWT_SECRET;
 
@@ -64,7 +67,7 @@ const connection = mysql.createConnection({
     host: 'localhost',
     user: 'root',
     password: '12345',
-    database: '101'
+    database: '102'
 });
 
 connection.connect(err => {

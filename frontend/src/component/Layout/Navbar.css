@@ -2,15 +2,14 @@
     height: 100vh;
     background-color: white;
     display: flexed;
-    flex-direction: column;  /* จัดการให้รายการใน navbar เป็นคอลัมน์ */
-    justify-content: flex-start;  /* จัดเรียงรายการจากด้านบน */
+ 
 }
-
 .navbar-list {
     list-style-type: none;  /* ไม่ใช้จุดหน้ารายการ */
-    padding: 0;
+    padding: 20px;
     margin: 0;
-    width: 100%;  /* ใช้ความกว้างทั้งหมด */
+    border-radius: 25px;
+    width: 70%;  /* ใช้ความกว้างทั้งหมด */
 }
 
 .navbar-list li {
@@ -28,10 +27,15 @@
     transition: background-color 0.3s, color 0.3s;  /* ทำให้การเปลี่ยนสีเนียนขึ้น */
 }
 
-/* สไตล์เมื่อโฮเวอร์ที่ลิงก์ */
-.navbar-list li a:hover {
-    background-color: #f0f0f0;  /* สีพื้นหลังเมื่อโฮเวอร์ */
-    color: #0073e6;  /* สีตัวอักษรเมื่อโฮเวอร์ */
+
+.navbar-list li :focus,
+.navbar-list li :active,
+.navbar-list li a:active,
+.navbar-list li a.active {
+    width: 190px;
+    border-radius: 25px;
+    background-color: rgba(38, 22, 144);  /* สีพื้นหลังของลิงก์ที่กําลังใช้งาน */
+    color: white;  /* สีตัวอักษรของลิงก์ที่กําลังใช้งาน */
 }
 
 /* สไตล์ของปุ่ม Logout */
@@ -39,7 +43,7 @@
     padding: 10px 20px;
     color: #ff4d4d;  /* สีแดง */
     font-size: 16px;
-    border: none;
+    border-radius: 25px;
     background: none;
     cursor: pointer;
     text-decoration: none;

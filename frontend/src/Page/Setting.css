@@ -1,74 +1,180 @@
-/* ส่วนของการจัดรูปแบบ container หลัก */
-.setting-container {
-  margin: 20px 0;
-  padding: 20px;
-  border-radius: 8px;
+/* Global Font & Reset */
+body {
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
   background-color: #f9f9f9;
-  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-
+  color: #333;
+  margin-bottom: 0;
+  padding: 0;
 }
 
-/* ส่วนของหัวข้อ */
-h2, h3 {
-  font-family: 'Arial', sans-serif;
+.main {
+  margin: 20px 30px;
+  margin-bottom: 0;
+}
+.setting-container {
+  background-color: #ffffff;
+  padding: 30px;
+  border-radius: 12px;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+  margin-bottom: 40px;
+  transition: box-shadow 0.3s ease;
+}
+
+.setting-container:hover {
+  box-shadow: 0 10px 18px rgba(0, 0, 0, 0.15); 
+}
+
+/* Headings */
+h2 {
+  font-size: 28px;
   color: #333;
   margin-bottom: 20px;
+  font-weight: bold;
+  text-transform: uppercase;
+  letter-spacing: 1px;
 }
 
-/* ฟอร์มเพิ่มผู้ใช้ */
-.setting-container input {
-  width: 100%;
+h3 {
+  font-size: 20px;
+  margin-bottom: 15px;
+}
+
+/* Add User Form */
+.add-user {
+  background-color: #f5f7fa;
+  padding: 20px;
+  border-radius: 10px;
+  margin-bottom: 30px;
+}
+
+.add-user-form {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.add-user-form input,
+.add-user-form select {
+  flex: 1 1 30%;
   padding: 10px;
-  margin: 8px 0;
-  border-radius: 4px;
+  border-radius: 6px;
   border: 1px solid #ccc;
+  background-color: #fff;
+  transition: border-color 0.3s ease;
   font-size: 16px;
 }
 
-.setting-container input:focus {
+.add-user-form input:focus,
+.add-user-form select:focus {
   border-color: #0073e6;
   outline: none;
+  box-shadow: 0 0 8px rgba(0, 115, 230, 0.2);
 }
 
-/* ปุ่ม */
+/* Buttons */
 button {
-  padding: 10px 20px;
+  padding: 12px 24px;
   background-color: #0073e6;
   color: white;
   border: none;
-  border-radius: 4px;
+  border-radius: 6px;
   cursor: pointer;
   font-size: 16px;
+  transition: all 0.3s ease;
   margin-top: 10px;
-  transition: background-color 0.3s;
 }
 
 button:hover {
   background-color: #005bb5;
+  transform: translateY(-2px);
 }
 
-/* ส่วนของรายการผู้ใช้ */
-.user-list {
-  list-style-type: none;
-  padding: 0;
-  margin: 0;
+button:active {
+  background-color: #003f87;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+  transform: translateY(1px);
 }
 
-.user-card {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  background-color: #fff;
-  padding: 15px;
-  margin: 10px 0;
-  border-radius: 8px;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+/* Action buttons */
+
+.editt{
+  background-color: #0073e6;
 }
 
-.user-card span {
-  flex: 1;
-  font-size: 16px;
-  color: #333;
+.edit {
+  background-color: #28a745;
+}
+
+.edit:hover {
+  background-color: #218838;
+}
+
+.delete {
+  background-color: #dc3545;
+}
+
+.delete:hover {
+  background-color: #c82333;
+}
+
+.cancel {
+  background-color: #6c757d;
+}
+
+.cancel:hover {
+  background-color: #5a6268;
+}
+
+.edit, .delete, .cancel {
+  padding: 8px 14px;
+  border-radius: 6px;
+  font-size: 14px;
+  margin-right: 6px;
+  width: 80px;
+}
+
+/* User Table */
+.user-table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 20px;
+  border-radius: 10px;
+  overflow: hidden;
+}
+
+.user-table th, .user-table {
+  border: 1px solid #ddd;
+  padding: 12px;
+  text-align: left;
+}
+
+td{
+  border-bottom: 1px solid #ddd;
+  padding: 12px;
+  text-align: left;
+  height: 40px;
+}
+
+.user-table th {
+  background-color: #f2f2f2;
+  font-weight: bold;
+}
+
+.user-table tr:hover {
+  background-color: #f1f1f1;
+}
+
+.user-table td {
+  vertical-align: middle;
+}
+
+/* Edit mode inputs in table */
+.user-table input,
+.user-table select {
+  padding: 8px;
+  border-radius: 4px;
+  border: 1px solid #ccc;
+  width: 90%;
 }
 
 .user-actions {
@@ -76,108 +182,36 @@ button:hover {
   gap: 10px;
 }
 
-.user-actions button {
-  padding: 5px 15px;
-  font-size: 14px;
-  background-color: #ff4d4d;
-  color: white;
-  border: none;
-  border-radius: 4px;
-  cursor: pointer;
-  transition: background-color 0.3s;
+/* Responsive */
+@media (max-width: 768px) {
+  .add-user-form input,
+  .add-user-form select {
+    flex: 1 1 100%;
+  }
+
+  .user-table th,
+  .user-table td {
+    font-size: 14px;
+  }
+
+  .edit, .delete, .cancel {
+    width: auto;
+    font-size: 12px;
+    padding: 6px 10px;
+  }
+
+  .main {
+    margin: 10px;
+  }
+
+  .setting-container {
+    padding: 20px;
+  }
 }
 
-.user-actions button:hover {
-  background-color: #e60000;
+.user-table-body {
+  max-height: 400px; /* หรือค่าที่เหมาะสมกับหน้าจอ */
+  overflow-y: auto;
+  margin-top: 10px;
 }
 
-.cancel {
-  background-color: #ccc;
-}
-
-.cancel:hover {
-  background-color: #999;
-}
-
-/* เมื่อมีการแก้ไขข้อมูลผู้ใช้ */
-.user-card input {
-  width: 200px;
-  margin: 5px 0;
-}
-
-.user-card input:focus {
-  border-color: #0073e6;
-  outline: none;
-}
-
-.user-card div {
-  display: flex;
-  flex-direction: column;
-  gap: 10px;
-}
-
-.setting-container {
-  margin-bottom: 20px;
-}
-
-input[type="text"], input[type="password"], input[type="email"], input[type="number"] {
-  padding: 8px;
-  margin: 5px;
-  width: 100%; /* ปรับให้เต็มความกว้าง */
-}
-
-button {
-  padding: 8px 16px;
-  margin: 10px;
-  cursor: pointer;
-  background-color: #4CAF50;
-  color: white;
-  border: none;
-  border-radius: 5px;
-}
-
-button:hover {
-  background-color: #45a049;
-}
-
-.user-table {
-  width: 100%;
-  border-collapse: collapse;
-  margin-top: 20px;
-}
-
-.user-table th, .user-table td {
-  border: 1px solid #ddd;
-  padding: 8px;
-  text-align: left;
-}
-
-.user-table th {
-  background-color: #f2f2f2;
-}
-
-.user-actions button {
-  margin-right: 10px;
-}
-
-.cancel {
-  background-color: #f44336;
-}
-
-.cancel:hover {
-  background-color: #e53935;
-}
-
-/* การจัดรูปแบบของตาราง */
-.user-table tr {
-  margin-bottom: 8px;
-}
-
-.user-table td {
-  vertical-align: middle;
-}
-
-.main{
-  margin: 10px 30px 0px 30px;
-
-}

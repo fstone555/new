@@ -1,68 +1,110 @@
-/* ตรงนี้คือส่วนที่ครอบไว้ให้อยู่กลางจอ */
+/* กลางจอ + พื้นหลังสวย */
 .login-container {
   display: flex;
   justify-content: center;
   align-items: center;
+  width: 100vw;
   height: 100vh;
-  background-color: #473366;
+  padding: 20px;
 }
 
+/* การ์ด login */
 .login-card {
-  width: 320px;
-  padding: 30px;
-  border-radius: 20px;
+  width: 100%;
+  max-width: 400px;
+  padding: 40px 30px;
+  border-radius: 16px;
   background: white;
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.2);
   text-align: center;
 }
 
+/* โลโก้ */
 .logo {
-  width: 50px;
-  margin-bottom: 10px;
+  width: 65px;
+  height: 65px;
+  border-radius: 50%;
 }
 
+/* หัวข้อ */
+h2 {
+  font-size: 26px;
+  color: #333;
+  margin-top: 10px;
+  margin-bottom: 20px;
+}
+
+/* อินพุต */
 input {
-  width: 94%;
-  padding: 10px;
+  width: 100%;
+  padding: 12px 14px;
   margin: 10px 0;
-  border: none;
-  border-radius: 8px;
-  background-color: #f0f0f0;
+  border: 1px solid #ccc;
+  border-radius: 10px;
+  background-color: #f7f7f7;
+  font-size: 16px;
+  transition: 0.3s;
 }
 
-button {
-  width: 100%;
-  padding: 12px;
-  border: none;
-  border-radius: 8px;
-  background-color: #4b2e83;
+input:focus {
+  border-color: #7d5eff;
+  outline: none;
+  background-color: #fff;
+}
+
+/* ปุ่ม login */
+.Login {
+  background-color: #7d5eff;
   color: white;
   font-weight: bold;
-  margin-top: 10px;
+  border: none;
+  border-radius: 10px;
+  padding: 12px;
+  width: 100%;
+  margin-top: 15px;
   cursor: pointer;
+  transition: 0.3s ease;
+}
+
+.Login:hover {
+  background-color: #674de0;
+  transform: translateY(-2px);
 }
 
 button:disabled {
   opacity: 0.6;
+  cursor: not-allowed;
 }
 
+/* ข้อความ error */
 .error {
-  color: red;
-  margin-top: 8px;
+  color: #e74c3c;
+  margin-top: 10px;
+  font-size: 0.9em;
 }
 
+/* ลิงก์ลืมรหัสผ่าน */
 .forgot-link {
   display: block;
-  margin-top: 10px;
-  color: #e74c3c;
-  font-size: 0.9em;
+  margin-top: 12px;
+  color: #666;
+  font-size: 0.85em;
   text-decoration: none;
+  transition: 0.3s;
 }
 
+.forgot-link:hover {
+  color: #333;
+  text-decoration: underline;
+}
+
+/* เส้นคั่น */
 .divider {
-  margin: 20px 0;
   position: relative;
+  margin: 25px 0;
   text-align: center;
+  color: #999;
+  font-size: 0.9em;
 }
 
 .divider::before,
@@ -83,10 +125,12 @@ button:disabled {
   right: 0;
 }
 
+/* ปุ่มอื่นๆ */
 .alt-login {
   display: flex;
   justify-content: space-between;
   gap: 10px;
+  margin-top: 10px;
 }
 
 .line-btn {
@@ -94,9 +138,14 @@ button:disabled {
   background-color: #00c300;
   color: white;
   padding: 10px;
-  border-radius: 8px;
+  border-radius: 10px;
   border: none;
   font-weight: bold;
+  transition: background-color 0.3s;
+}
+
+.line-btn:hover {
+  background-color: #009900;
 }
 
 .passkey-btn {
@@ -104,17 +153,36 @@ button:disabled {
   background-color: #e0e0e0;
   color: #444;
   padding: 10px;
-  border-radius: 8px;
+  border-radius: 10px;
   border: none;
   font-weight: bold;
+  transition: background-color 0.3s;
 }
 
-.Login {
-  background-color: #473366;
-  justify-content: center;
-  justify-items: center;
+.passkey-btn:hover {
+  background-color: #ccc;
 }
 
-h2 {
-  color: black;
+/* Responsive */
+@media (max-width: 480px) {
+  .login-card {
+    padding: 30px 20px;
+  }
+
+  h2 {
+    font-size: 22px;
+  }
+
+  .line-btn,
+  .passkey-btn {
+    font-size: 14px;
+    padding: 8px;
+  }
+}
+
+
+input{
+  position: relative;
+  margin: 12px 0;
+  width: 90%;
 }
