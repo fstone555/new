@@ -1,6 +1,14 @@
+/* ตรงนี้คือส่วนที่ครอบไว้ให้อยู่กลางจอ */
+.login-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100vh;
+  background-color: #473366;
+}
+
 .login-card {
   width: 320px;
-  margin: 5% auto;
   padding: 30px;
   border-radius: 20px;
   background: white;
@@ -101,11 +109,12 @@ button:disabled {
   font-weight: bold;
 }
 
-.Login{
+.Login {
   background-color: #473366;
+  justify-content: center;
+  justify-items: center;
 }
 
-h2{
+h2 {
   color: black;
 }
-

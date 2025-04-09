@@ -1,32 +1,29 @@
 import { Outlet, useNavigate } from "react-router-dom";
-import Header from "./Header";
-import Footer from "./Footer";
 import Navbar from "./Navbar";
+import './Layout.css';
 
 const Layout = ({ setToken }) => {
   const navigate = useNavigate();
 
   const logout = () => {
-    setToken(null);
-    localStorage.removeItem('token');
-    navigate('/login', { replace: true });
+    setToken(null); // Set the token to null (clear state)
+    localStorage.removeItem('token'); // Remove token from local storage
+    console.log("Logging out...");
+    navigate('/login', { replace: true }); // Redirect to login page
   };
 
   return (
-    <div className="flex min-h-screen">
-      <div className="w-[270px] fixed h-screen bg-gray-800 text-white">
-        <Navbar logout={logout} />
+    <div className="full">
+      {/* Navbar (Fixed on the left) */}
+      <div className="navbar">
+        <Navbar logout={logout} /> {/* ส่ง logout ไปที่ Navbar */}
       </div>
-      <div className="flex flex-col flex-grow ml-[270px]">
-        <header className="bg-green-600 p-4 text-white">
-          <Header />
-        </header>
-        <main className="flex-grow p-4 bg-gray-100">
-          <Outlet />
+
+      {/* Main Content (Offset by Navbar width) */}
+      <div className="main">
+        <main>
+          <Outlet /> {/* This will render the current page */}
         </main>
-        <footer className="bg-orange-400 p-4 text-white">
-          <Footer />
-        </footer>
       </div>
     </div>
   );

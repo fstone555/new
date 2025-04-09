@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
+import './Home.css'
 
 function Home() {
     const [departments, setDepartments] = useState([]);
@@ -19,7 +20,7 @@ function Home() {
     }, []);
 
     return (
-        <div>
+        <div className='home-container'>
             <h1>Home</h1>
             <h2>Departments</h2>
             <ul>

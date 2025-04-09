@@ -1,11 +1,12 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
+import './Setting.css';
 
 const UsersPage = () => {
   const [users, setUsers] = useState([]);
   const [newUser, setNewUser] = useState({
     username: '',
-    password: '', // เพิ่มช่องนี้
+    password: '',
     first_name: '',
     last_name: '',
     email: '',
@@ -70,10 +71,11 @@ const UsersPage = () => {
   };
 
   return (
-    <div className="container">
+    <div className='main'>
+    <div className='setting-container'>
       <h2>Users Management</h2>
-  
-      <div>
+
+      <div className="setting-container">
         <h3>Add User</h3>
         <input type="text" placeholder="Username" value={newUser.username} onChange={(e) => setNewUser({ ...newUser, username: e.target.value })} />
         <input type="password" placeholder="Password" value={newUser.password} onChange={(e) => setNewUser({ ...newUser, password: e.target.value })} />
@@ -83,37 +85,53 @@ const UsersPage = () => {
         <input type="number" placeholder="Department ID" value={newUser.department_id} onChange={(e) => setNewUser({ ...newUser, department_id: e.target.value })} />
         <button onClick={handleAddUser}>Add User</button>
       </div>
-  
+
       <h3>Existing Users</h3>
-      <ul className="user-list">
-        {users.map(user => (
-          <li className="user-card" key={user.User_id}>
-            {editingUserId === user.User_id ? (
-              <div style={{ flex: 1 }}>
-                <input type="text" value={editUserData.username} onChange={(e) => setEditUserData({ ...editUserData, username: e.target.value })} />
-                <input type="text" value={editUserData.first_name} onChange={(e) => setEditUserData({ ...editUserData, first_name: e.target.value })} />
-                <input type="text" value={editUserData.last_name} onChange={(e) => setEditUserData({ ...editUserData, last_name: e.target.value })} />
-                <input type="email" value={editUserData.email} onChange={(e) => setEditUserData({ ...editUserData, email: e.target.value })} />
-                <input type="number" value={editUserData.department_id} onChange={(e) => setEditUserData({ ...editUserData, department_id: e.target.value })} />
-                <div className="user-actions">
-                  <button onClick={handleUpdateUser}>Save</button>
-                  <button className="cancel" onClick={() => setEditingUserId(null)}>Cancel</button>
-                </div>
-              </div>
-            ) : (
-              <>
-                <span>{user.username} ({user.first_name} {user.last_name}) - {user.email}</span>
-                <div className="user-actions">
-                  <button onClick={() => handleEditClick(user)}>Edit</button>
-                  <button onClick={() => handleDeleteUser(user.User_id)}>Delete</button>
-                </div>
-              </>
-            )}
-          </li>
-        ))}
-      </ul>
+      <table className="user-table">
+        <thead>
+          <tr>
+            <th>Username</th>
+            <th>Full Name</th>
+            <th>Email</th>
+            <th>Department ID</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          {users.map(user => (
+            <tr key={user.User_id}>
+              {editingUserId === user.User_id ? (
+                <td colSpan="5">
+                  <input type="text" value={editUserData.username} onChange={(e) => setEditUserData({ ...editUserData, username: e.target.value })} />
+                  <input type="text" value={editUserData.first_name} onChange={(e) => setEditUserData({ ...editUserData, first_name: e.target.value })} />
+                  <input type="text" value={editUserData.last_name} onChange={(e) => setEditUserData({ ...editUserData, last_name: e.target.value })} />
+                  <input type="email" value={editUserData.email} onChange={(e) => setEditUserData({ ...editUserData, email: e.target.value })} />
+                  <input type="number" value={editUserData.department_id} onChange={(e) => setEditUserData({ ...editUserData, department_id: e.target.value })} />
+                  <div className="user-actions">
+                    <button onClick={handleUpdateUser}>Save</button>
+                    <button className="cancel" onClick={() => setEditingUserId(null)}>Cancel</button>
+                  </div>
+                </td>
+              ) : (
+                <>
+                  <td>{user.username}</td>
+                  <td>{user.first_name} {user.last_name}</td>
+                  <td>{user.email}</td>
+                  <td>{user.department_id}</td>
+                  <td>
+                    <button onClick={() => handleEditClick(user)}>Edit</button>
+                    <button onClick={() => handleDeleteUser(user.User_id)}>Delete</button>
+                  </td>
+                </>
+              )}
+            </tr>
+          ))}
+        </tbody>
+      </table>
+    </div>
     </div>
   );
+  
 };
 
 export default UsersPage;

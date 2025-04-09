@@ -1,72 +1,183 @@
-.container {
-    max-width: 800px;
-    margin: 40px auto;
-    padding: 20px;
-    background-color: #f9fafb;
-    border-radius: 12px;
-    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1);
-    font-family: 'Segoe UI', sans-serif;
-  }
-  
-  h2 {
-    text-align: center;
-    color: #333;
-    margin-bottom: 30px;
-  }
-  
-  input {
-    display: block;
-    margin: 8px 0;
-    padding: 10px;
-    width: 100%;
-    border: 1px solid #ccc;
-    border-radius: 8px;
-    font-size: 1rem;
-  }
-  
-  button {
-    margin-top: 10px;
-    margin-right: 8px;
-    padding: 10px 16px;
-    background-color: #007bff;
-    color: white;
-    border: none;
-    border-radius: 8px;
-    cursor: pointer;
-    transition: background 0.2s;
-  }
-  
-  button:hover {
-    background-color: #0056b3;
-  }
-  
-  button.cancel {
-    background-color: #6c757d;
-  }
-  
-  .user-list {
-    list-style: none;
-    padding: 0;
-    margin-top: 20px;
-  }
-  
-  .user-card {
-    background: white;
-    padding: 16px;
-    margin-bottom: 12px;
-    border-radius: 8px;
-    border: 1px solid #ddd;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-  }
-  
-  .user-card span {
-    font-size: 1rem;
-    color: #333;
-  }
-  
-  .user-actions button {
-    margin-left: 8px;
-  }
-  
+/* ส่วนของการจัดรูปแบบ container หลัก */
+.setting-container {
+  margin: 20px 0;
+  padding: 20px;
+  border-radius: 8px;
+  background-color: #f9f9f9;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+
+}
+
+/* ส่วนของหัวข้อ */
+h2, h3 {
+  font-family: 'Arial', sans-serif;
+  color: #333;
+  margin-bottom: 20px;
+}
+
+/* ฟอร์มเพิ่มผู้ใช้ */
+.setting-container input {
+  width: 100%;
+  padding: 10px;
+  margin: 8px 0;
+  border-radius: 4px;
+  border: 1px solid #ccc;
+  font-size: 16px;
+}
+
+.setting-container input:focus {
+  border-color: #0073e6;
+  outline: none;
+}
+
+/* ปุ่ม */
+button {
+  padding: 10px 20px;
+  background-color: #0073e6;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 16px;
+  margin-top: 10px;
+  transition: background-color 0.3s;
+}
+
+button:hover {
+  background-color: #005bb5;
+}
+
+/* ส่วนของรายการผู้ใช้ */
+.user-list {
+  list-style-type: none;
+  padding: 0;
+  margin: 0;
+}
+
+.user-card {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background-color: #fff;
+  padding: 15px;
+  margin: 10px 0;
+  border-radius: 8px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.user-card span {
+  flex: 1;
+  font-size: 16px;
+  color: #333;
+}
+
+.user-actions {
+  display: flex;
+  gap: 10px;
+}
+
+.user-actions button {
+  padding: 5px 15px;
+  font-size: 14px;
+  background-color: #ff4d4d;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: background-color 0.3s;
+}
+
+.user-actions button:hover {
+  background-color: #e60000;
+}
+
+.cancel {
+  background-color: #ccc;
+}
+
+.cancel:hover {
+  background-color: #999;
+}
+
+/* เมื่อมีการแก้ไขข้อมูลผู้ใช้ */
+.user-card input {
+  width: 200px;
+  margin: 5px 0;
+}
+
+.user-card input:focus {
+  border-color: #0073e6;
+  outline: none;
+}
+
+.user-card div {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.setting-container {
+  margin-bottom: 20px;
+}
+
+input[type="text"], input[type="password"], input[type="email"], input[type="number"] {
+  padding: 8px;
+  margin: 5px;
+  width: 100%; /* ปรับให้เต็มความกว้าง */
+}
+
+button {
+  padding: 8px 16px;
+  margin: 10px;
+  cursor: pointer;
+  background-color: #4CAF50;
+  color: white;
+  border: none;
+  border-radius: 5px;
+}
+
+button:hover {
+  background-color: #45a049;
+}
+
+.user-table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 20px;
+}
+
+.user-table th, .user-table td {
+  border: 1px solid #ddd;
+  padding: 8px;
+  text-align: left;
+}
+
+.user-table th {
+  background-color: #f2f2f2;
+}
+
+.user-actions button {
+  margin-right: 10px;
+}
+
+.cancel {
+  background-color: #f44336;
+}
+
+.cancel:hover {
+  background-color: #e53935;
+}
+
+/* การจัดรูปแบบของตาราง */
+.user-table tr {
+  margin-bottom: 8px;
+}
+
+.user-table td {
+  vertical-align: middle;
+}
+
+.main{
+  margin: 10px 30px 0px 30px;
+
+}

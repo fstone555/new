@@ -1,15 +1,19 @@
 import { Link } from 'react-router-dom';
+import './Navbar.css';
 
 const Navbar = ({ logout }) => {
   return (
     <nav>
-      <ul>
-        <li><Link to="/home">Home</Link></li>
-        <li><Link to="/bookmark">Bookmark</Link></li>
-        <li><Link to="/noti">Noti</Link></li>
-        <li><Link to="/setting">Setting</Link></li>
-        <li><button onClick={logout}>Logout</button></li>
-      </ul>
+      <div className="navbar">
+        <ul className='navbar-list'>
+          <li><Link to="/home" className="hover:underline">🏠 Home</Link></li>
+          <li><Link to="/bookmark" className="hover:underline">🔖 Bookmark</Link></li>
+          <li><Link to="/noti" className="hover:underline">🔔 Noti</Link></li>
+          <li><Link to="/setting" className="hover:underline">⚙️ Setting</Link></li>
+          <li></li>
+          <button onClick={logout} className="text-red-400 hover:underline">🚪 Logout</button>
+        </ul>
+      </div>
     </nav>
   );
 };

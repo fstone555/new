@@ -1,0 +1,54 @@
+.navbar{
+    height: 100vh;
+    background-color: white;
+    display: flexed;
+    flex-direction: column;  /* จัดการให้รายการใน navbar เป็นคอลัมน์ */
+    justify-content: flex-start;  /* จัดเรียงรายการจากด้านบน */
+}
+
+.navbar-list {
+    list-style-type: none;  /* ไม่ใช้จุดหน้ารายการ */
+    padding: 0;
+    margin: 0;
+    width: 100%;  /* ใช้ความกว้างทั้งหมด */
+}
+
+.navbar-list li {
+    margin: 10px 0;  /* ช่องว่างระหว่างรายการเมนู */
+}
+
+.navbar-list li a {
+    display: block;  /* ทำให้ลิงก์เต็มความกว้าง */
+    padding: 10px 20px;  /* ช่องว่างในลิงก์ */
+    color: #333;  /* สีตัวอักษร */
+    font-weight: 500;  /* ความหนาของตัวอักษร */
+    font-size: 16px;
+    text-decoration: none;  /* เอาเส้นใต้ของลิงก์ออก */
+    border-radius: 8px;  /* มุมโค้ง */
+    transition: background-color 0.3s, color 0.3s;  /* ทำให้การเปลี่ยนสีเนียนขึ้น */
+}
+
+/* สไตล์เมื่อโฮเวอร์ที่ลิงก์ */
+.navbar-list li a:hover {
+    background-color: #f0f0f0;  /* สีพื้นหลังเมื่อโฮเวอร์ */
+    color: #0073e6;  /* สีตัวอักษรเมื่อโฮเวอร์ */
+}
+
+/* สไตล์ของปุ่ม Logout */
+.navbar-list button {
+    padding: 10px 20px;
+    color: #ff4d4d;  /* สีแดง */
+    font-size: 16px;
+    border: none;
+    background: none;
+    cursor: pointer;
+    text-decoration: none;
+    transition: color 0.3s, background-color 0.3s;
+}
+
+/* สไตล์เมื่อโฮเวอร์ที่ปุ่ม Logout */
+.navbar-list button:hover {
+    color: #e60000;  /* สีแดงเข้มเมื่อโฮเวอร์ */
+    background-color: #f8d7da;  /* พื้นหลังอ่อนๆ เมื่อโฮเวอร์ */
+    border-radius: 8px;  /* มุมโค้ง */
+}

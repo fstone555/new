@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
-import './Login.css';
+// import './Login.css';
 
 function Login({ setToken }) {
   const [username, setUsername] = useState('');
@@ -46,33 +46,37 @@ function Login({ setToken }) {
   }, [username, password, navigate, setToken]);
 
   return (
-    <div className='login-card'>
-      <img src="https://cdn.shopify.com/s/files/1/0573/7569/files/best_day_ever_079_600x.jpg?v=1724059603" alt="Logo" className="logo" />
-      <h2>Login</h2>
-      <input className='input'
-        type="text"
-        placeholder="User_id"
-        value={username}
-        onChange={(e) => setUsername(e.target.value)}
-      />
-      <input className='input'
-        type="password"
-        placeholder="Password"
-        value={password}
-        onChange={(e) => setPassword(e.target.value)}
-      />
-      <button className='Login' onClick={loginUser} disabled={loading}>
-        {loading ? 'Logging in...' : 'Login'}
-      </button>
-      {error && <p className="error">{error}</p>}
+    <div className="login-container">
+      <div className="login-card">
+        <img src="https://cdn.shopify.com/s/files/1/0573/7569/files/best_day_ever_079_600x.jpg?v=1724059603" alt="Logo" className="logo" />
+        <h2>Login</h2>
+        <input
+          className="input"
+          type="text"
+          placeholder="User_id"
+          value={username}
+          onChange={(e) => setUsername(e.target.value)}
+        />
+        <input
+          className="input"
+          type="password"
+          placeholder="Password"
+          value={password}
+          onChange={(e) => setPassword(e.target.value)}
+        />
+        <button className="Login" onClick={loginUser} disabled={loading}>
+          {loading ? 'Logging in...' : 'Login'}
+        </button>
+        {error && <p className="error">{error}</p>}
 
-      <a href="#" className="forgot-link">Forget password?</a>
+        <a href="#" className="forgot-link">Forget password?</a>
 
-      <div className="divider">or</div>
+        <div className="divider">or</div>
 
-      <div className="alt-login">
-        <button className="line-btn">LINE</button>
-        <button className="passkey-btn">🔑 Passkey</button>
+        <div className="alt-login">
+          <button className="line-btn">LINE</button>
+          <button className="passkey-btn">🔑 Passkey</button>
+        </div>
       </div>
     </div>
   );

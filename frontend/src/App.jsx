@@ -1,6 +1,8 @@
 import { useState } from 'react';
 import './App.css';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
+
+// Layout และหน้าต่าง ๆ
 import Layout from './component/Layout/Layout';
 import Home from './Page/Home';
 import Bookmark from './Page/Bookmark';
@@ -12,6 +14,7 @@ import HR from './Department/HR';
 function App() {
   const [token, setToken] = useState(() => localStorage.getItem('token'));
 
+  // เช็คสิทธิ์การเข้าถึงหน้าที่ต้องล็อกอิน
   const ProtectedRoute = ({ children }) => {
     return token ? children : <Navigate to="/login" replace />;
   };
@@ -19,10 +22,18 @@ function App() {
   return (
     <Router>
       <Routes>
+        {/* Default route */}
         <Route path="/" element={<Navigate to={token ? "/home" : "/login"} />} />
+
+        {/* Login page */}
         <Route path="/login" element={<Login setToken={setToken} />} />
+
+        {/* Protected Routes */}
         <Route
-          element={<ProtectedRoute><Layout setToken={setToken} /></ProtectedRoute>
+          element={
+            <ProtectedRoute>
+              <Layout setToken={setToken} />
+            </ProtectedRoute>
           }
         >
           <Route path="/home" element={<Home />} />
