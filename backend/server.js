@@ -72,19 +72,12 @@ connection.connect(err => {
         console.error('❌ Database connection failed:', err);
     } else {
         console.log('✅ Connected to MySQL');
-<<<<<<< HEAD
     }
 });
-
-=======
         console.log(`Database: ${connection.config.database}`);
         console.log(`Host: ${connection.config.host}`);
         console.log(`User: ${connection.config.user}`);
-    }
-});
 
-
->>>>>>> 0634568 (update)
 // 🔐 Middleware: ตรวจสอบ JWT
 function authenticateToken(req, res, next) {
     const authHeader = req.headers['authorization'];
@@ -136,8 +129,6 @@ app.post('/api/login', (req, res) => {
     });
 });
 
-<<<<<<< HEAD
-=======
 // ฟังก์ชันรีเซ็ตรหัสผ่าน
 app.post('/api/reset-password', async (req, res) => {
     const { email, newPassword } = req.body;
@@ -162,7 +153,6 @@ app.post('/api/reset-password', async (req, res) => {
 });
 
 
->>>>>>> 0634568 (update)
 /**
  * @swagger
  * /api/departments:
@@ -582,8 +572,4 @@ app.post('/api/users', async (req, res) => {
 // 🚀 Start Server
 app.listen(port, () => {
     console.log(`🚀 Server is running on http://localhost:${port}`);
-<<<<<<< HEAD
-=======
-    console.log('✅ Connected to MySQL');
->>>>>>> 0634568 (update)
 });

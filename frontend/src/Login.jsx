@@ -17,10 +17,9 @@ function Login({ setToken }) {
     }
   }, [navigate, location]);
 
-  // Improved login function with useCallback to avoid re-creating the function on every render
   const loginUser = useCallback(async () => {
-    setLoading(true);  // Set loading to true when login starts
-    setError(''); // Clear any previous errors
+    setLoading(true);
+    setError('');
 
     const user = { username, password };
 
@@ -42,29 +41,39 @@ function Login({ setToken }) {
     } catch (error) {
       setError('Server error. Please try again later.');
     } finally {
-      setLoading(false); // Set loading to false when login completes
+      setLoading(false);
     }
   }, [username, password, navigate, setToken]);
 
   return (
-    <div className='login-container'>
+    <div className='login-card'>
+      <img src="https://cdn.shopify.com/s/files/1/0573/7569/files/best_day_ever_079_600x.jpg?v=1724059603" alt="Logo" className="logo" />
       <h2>Login</h2>
-      <input
+      <input className='input'
         type="text"
-        placeholder="Username"
+        placeholder="User_id"
         value={username}
         onChange={(e) => setUsername(e.target.value)}
       />
-      <input
+      <input className='input'
         type="password"
         placeholder="Password"
         value={password}
         onChange={(e) => setPassword(e.target.value)}
       />
-      <button onClick={loginUser} disabled={loading}>
+      <button className='Login' onClick={loginUser} disabled={loading}>
         {loading ? 'Logging in...' : 'Login'}
       </button>
-      {error && <p style={{ color: 'red' }}>{error}</p>}
+      {error && <p className="error">{error}</p>}
+
+      <a href="#" className="forgot-link">Forget password?</a>
+
+      <div className="divider">or</div>
+
+      <div className="alt-login">
+        <button className="line-btn">LINE</button>
+        <button className="passkey-btn">🔑 Passkey</button>
+      </div>
     </div>
   );
 }
