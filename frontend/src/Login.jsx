@@ -1,5 +1,9 @@
 import { useState, useEffect } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
+<<<<<<< HEAD
+=======
+import "./Login.css"
+>>>>>>> 0634568 (update)
 
 function Login({ setToken }) {
   const [username, setUsername] = useState('');
@@ -40,7 +44,11 @@ function Login({ setToken }) {
   };
 
   return (
+<<<<<<< HEAD
     <div>
+=======
+    <div className='login-container'>
+>>>>>>> 0634568 (update)
       <h2>Login</h2>
       <input
         type="text"
