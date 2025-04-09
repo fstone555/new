@@ -1,26 +1,27 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
-<<<<<<< HEAD
-=======
-import "./Login.css"
->>>>>>> 0634568 (update)
+import './Login.css';
 
 function Login({ setToken }) {
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
+  const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
   const location = useLocation();
 
   useEffect(() => {
     const token = localStorage.getItem('token');
-    // ป้องกัน redirect ซ้ำถ้าเราอยู่ใน /home แล้ว
     if (token && location.pathname === '/login') {
       navigate('/home', { replace: true });
     }
   }, [navigate, location]);
 
-  const loginUser = async () => {
+  // Improved login function with useCallback to avoid re-creating the function on every render
+  const loginUser = useCallback(async () => {
+    setLoading(true);  // Set loading to true when login starts
+    setError(''); // Clear any previous errors
+
     const user = { username, password };
 
     try {
@@ -40,15 +41,13 @@ function Login({ setToken }) {
       }
     } catch (error) {
       setError('Server error. Please try again later.');
+    } finally {
+      setLoading(false); // Set loading to false when login completes
     }
-  };
+  }, [username, password, navigate, setToken]);
 
   return (
-<<<<<<< HEAD
-    <div>
-=======
     <div className='login-container'>
->>>>>>> 0634568 (update)
       <h2>Login</h2>
       <input
         type="text"
@@ -62,7 +61,9 @@ function Login({ setToken }) {
         value={password}
         onChange={(e) => setPassword(e.target.value)}
       />
-      <button onClick={loginUser}>Login</button>
+      <button onClick={loginUser} disabled={loading}>
+        {loading ? 'Logging in...' : 'Login'}
+      </button>
       {error && <p style={{ color: 'red' }}>{error}</p>}
     </div>
   );
