@@ -56,3 +56,11 @@
     background-color: #f8d7da;  /* พื้นหลังอ่อนๆ เมื่อโฮเวอร์ */
     border-radius: 8px;  /* มุมโค้ง */
 }
+
+.main {
+    flex-grow: 1; /* main content จะขยายเพื่อใช้พื้นที่ที่เหลือ */
+    padding: 20px;
+    overflow-y: auto; /* ให้เนื้อหาสามารถเลื่อนขึ้นลงได้ */
+    background-color: #f7f7f7; /* เลือกสีพื้นหลังของเนื้อหา */
+    height: 100vh; /* กำหนดความสูงเต็มหน้าจอ */
+  }

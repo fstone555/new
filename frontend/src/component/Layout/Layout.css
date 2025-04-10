@@ -1,8 +1,16 @@
-.full{
+.full {
     display: flex;
-}
-
-.navbar{
+    height: 100vh;
+    overflow: hidden;
+  }
+  
+  .navbar {
     width: 270px;
+    height: 100vh;
+    background-color: white;
+    border-right: 1px solid #e5e7eb;
+    box-shadow: 2px 0 6px rgba(0, 0, 0, 0.05);
+    position: relative;
+  }
 
-}
+  

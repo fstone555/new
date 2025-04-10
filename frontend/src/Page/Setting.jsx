@@ -85,7 +85,7 @@ const UsersPage = () => {
   };
 
   return (
-    <div className='main'>
+    <div>
       <div className='setting-container'>
         <h2>Users Management</h2>
 

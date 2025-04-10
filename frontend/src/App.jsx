@@ -10,6 +10,7 @@ import Noti from './Page/Noti';
 import Setting from './Page/Setting';
 import Login from './Login';
 import HR from './Department/HR';
+import Projects from './Page/Projects';
 
 function App() {
   const [token, setToken] = useState(() => localStorage.getItem('token'));
@@ -40,7 +41,7 @@ function App() {
           <Route path="/bookmark" element={<Bookmark />} />
           <Route path="/noti" element={<Noti />} />
           <Route path="/setting" element={<Setting />} />
-          <Route path="/projects/:id" element={<HR />} />
+          <Route path="/projects/:departmentId" element={<Projects />} /> {/* เปลี่ยนจาก HR เป็น Projects */}
         </Route>
       </Routes>
     </Router>

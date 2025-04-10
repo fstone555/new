@@ -281,6 +281,205 @@ app.get('/api/departments', (req, res) => {
     });
 });
 
+// 📄 ดึงข้อมูลแผนกที่ระบุ (ตาม department_id)
+app.get('/api/departments/:id', (req, res) => {
+    const { id } = req.params;
+    const sql = 'SELECT department_id, department_name FROM department WHERE department_id = ?';
+    
+    connection.query(sql, [id], (err, results) => {
+        if (err) return res.status(500).json({ error: 'Database error' });
+        if (results.length === 0) {
+            return res.status(404).json({ error: 'Department not found' });
+        }
+        res.json(results[0]);  // ส่งข้อมูลแผนกที่ตรงกับ department_id
+    });
+});
+
+
+
+// 📤 อัปโหลดไฟล์
+app.post('/api/upload', authenticateToken, upload.single('file'), (req, res) => {
+    if (!req.file) {
+        return res.status(400).json({ error: 'No file uploaded' });
+    }
+
+    const { originalname, mimetype, size, filename, path: filePath } = req.file;
+    const { userId } = req.user; // รับ userId จาก JWT token
+
+    // ข้อมูลไฟล์ที่จะบันทึกลงในฐานข้อมูล
+    const sql = 'INSERT INTO files (file_name, file_type, file_size, file_path, uploaded_by) VALUES (?, ?, ?, ?, ?)';
+    const values = [originalname, mimetype, size, filePath, userId];
+
+    connection.query(sql, values, (err, result) => {
+        if (err) {
+            return res.status(500).json({ error: 'Failed to save file data', details: err });
+        }
+        res.json({ message: 'File uploaded successfully', fileId: result.insertId });
+    });
+});
+
+// 📄 ดึงข้อมูลไฟล์ทั้งหมด
+app.get('/api/files', authenticateToken, (req, res) => {
+    const sql = 'SELECT file_id, file_name, file_type, file_size, file_path, uploaded_by, upload_date FROM files';
+    connection.query(sql, (err, results) => {
+        if (err) return res.status(500).json({ error: 'Database error' });
+        res.json(results);
+    });
+});
+
+// 📄 ดึงข้อมูลไฟล์ตาม ID
+app.get('/api/files/:id', authenticateToken, (req, res) => {
+    const { id } = req.params;
+    const sql = 'SELECT file_id, file_name, file_type, file_size, file_path, uploaded_by, upload_date FROM files WHERE file_id = ?';
+    connection.query(sql, [id], (err, results) => {
+        if (err) return res.status(500).json({ error: 'Database error' });
+        if (results.length === 0) return res.status(404).json({ error: 'File not found' });
+        res.json(results[0]);
+    });
+});
+
+
+// 📥 ดาวน์โหลดไฟล์
+app.get('/api/files/download/:id', authenticateToken, (req, res) => {
+    const { id } = req.params;
+    const sql = 'SELECT file_path, file_name FROM files WHERE file_id = ?';
+    connection.query(sql, [id], (err, results) => {
+        if (err) return res.status(500).json({ error: 'Database error' });
+        if (results.length === 0) return res.status(404).json({ error: 'File not found' });
+
+        const file = results[0];
+        res.download(file.file_path, file.file_name, (err) => {
+            if (err) {
+                res.status(500).json({ error: 'File download failed', details: err });
+            }
+        });
+    });
+});
+
+
+// ❌ ลบไฟล์
+app.delete('/api/files/:id', authenticateToken, (req, res) => {
+    const { id } = req.params;
+
+    // ค้นหาไฟล์ในฐานข้อมูล
+    const sql = 'SELECT file_path FROM files WHERE file_id = ?';
+    connection.query(sql, [id], (err, results) => {
+        if (err) return res.status(500).json({ error: 'Database error' });
+        if (results.length === 0) return res.status(404).json({ error: 'File not found' });
+
+        const file = results[0];
+        
+        // ลบไฟล์จากระบบไฟล์
+        fs.unlink(file.file_path, (err) => {
+            if (err) return res.status(500).json({ error: 'File deletion failed', details: err });
+
+            // ลบข้อมูลไฟล์จากฐานข้อมูล
+            const deleteSql = 'DELETE FROM files WHERE file_id = ?';
+            connection.query(deleteSql, [id], (err, result) => {
+                if (err) return res.status(500).json({ error: 'Database error', details: err });
+                res.json({ message: 'File deleted successfully' });
+            });
+        });
+    });
+});
+
+// ดึงข้อมูลโปรเจคทั้งหมด
+app.get('/api/projects', (req, res) => {
+    connection.query('SELECT * FROM project', (err, results) => {
+      if (err) {
+        console.error('Error fetching projects:', err);
+        return res.status(500).json({ error: 'Failed to fetch projects' });
+      }
+      res.json(results);
+    });
+});
+  
+// ดึงข้อมูลโปรเจคตาม ID
+app.get('/api/projects/:id', (req, res) => {
+    const { id } = req.params;
+    connection.query('SELECT * FROM project WHERE project_id = ?', [id], (err, results) => {
+      if (err) {
+        console.error('Error fetching project:', err);
+        return res.status(500).json({ error: 'Failed to fetch project' });
+      }
+      if (results.length === 0) {
+        return res.status(404).json({ error: 'Project not found' });
+      }
+      res.json(results[0]);
+    });
+});
+
+// ดึงข้อมูลโปรเจคที่อยู่ในแผนกที่ระบุ
+app.get('/api/projects/department/:departmentId', (req, res) => {
+    const { departmentId } = req.params;
+    if (!departmentId) {
+        return res.status(400).json({ error: 'Department ID is required' });
+    }
+    connection.query('SELECT * FROM project WHERE department_id = ?', [departmentId], (err, results) => {
+      if (err) {
+        console.error('Error fetching projects:', err);
+        return res.status(500).json({ error: 'Failed to fetch projects' });
+      }
+      res.json(results);
+    });
+});
+
+
+  
+// เพิ่มโปรเจคใหม่
+app.post('/api/projects', (req, res) => {
+    const { project_name, description, department_id } = req.body;
+    connection.query(
+      'INSERT INTO project (project_name, description, department_id) VALUES (?, ?, ?)',
+      [project_name, description, department_id],
+      (err, results) => {
+        if (err) {
+          console.error('Error adding project:', err);
+          return res.status(500).json({ error: 'Failed to add project' });
+        }
+        res.status(201).json({
+          message: 'Project added successfully',
+          project_id: results.insertId,
+        });
+      }
+    );
+});
+  
+// แก้ไขโปรเจค
+app.put('/api/projects/:id', (req, res) => {
+    const { id } = req.params;
+    const { project_name, description, department_id } = req.body;
+    connection.query(
+      'UPDATE project SET project_name = ?, description = ?, department_id = ? WHERE project_id = ?',
+      [project_name, description, department_id, id],
+      (err, results) => {
+        if (err) {
+          console.error('Error updating project:', err);
+          return res.status(500).json({ error: 'Failed to update project' });
+        }
+        if (results.affectedRows === 0) {
+          return res.status(404).json({ error: 'Project not found' });
+        }
+        res.json({ message: 'Project updated successfully' });
+      }
+    );
+});
+  
+// ลบโปรเจค
+app.delete('/api/projects/:id', (req, res) => {
+    const { id } = req.params;
+    connection.query('DELETE FROM project WHERE project_id = ?', [id], (err, results) => {
+      if (err) {
+        console.error('Error deleting project:', err);
+        return res.status(500).json({ error: 'Failed to delete project' });
+      }
+      if (results.affectedRows === 0) {
+        return res.status(404).json({ error: 'Project not found' });
+      }
+      res.json({ message: 'Project deleted successfully' });
+    });
+});
+
 
 
 // 🚀 Start Server
