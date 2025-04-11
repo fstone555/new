@@ -15,8 +15,6 @@ const app = express();
 const port = 3000;
 
 
-
-
 // อ่านค่า secretKey จาก .env
 const secretKey = process.env.JWT_SECRET;
 
