@@ -11,6 +11,7 @@ const fs = require('fs');
 const app = express();
 const port = 3000;
 
+
 const secretKey = process.env.JWT_SECRET;
 if (!secretKey) {
     console.error('❌ JWT_SECRET is not defined in .env file');
@@ -297,92 +298,6 @@ app.get('/api/departments/:id', (req, res) => {
 
 
 
-// 📤 อัปโหลดไฟล์
-app.post('/api/upload', authenticateToken, upload.single('file'), (req, res) => {
-    if (!req.file) {
-        return res.status(400).json({ error: 'No file uploaded' });
-    }
-
-    const { originalname, mimetype, size, filename, path: filePath } = req.file;
-    const { userId } = req.user; // รับ userId จาก JWT token
-
-    // ข้อมูลไฟล์ที่จะบันทึกลงในฐานข้อมูล
-    const sql = 'INSERT INTO files (file_name, file_type, file_size, file_path, uploaded_by) VALUES (?, ?, ?, ?, ?)';
-    const values = [originalname, mimetype, size, filePath, userId];
-
-    connection.query(sql, values, (err, result) => {
-        if (err) {
-            return res.status(500).json({ error: 'Failed to save file data', details: err });
-        }
-        res.json({ message: 'File uploaded successfully', fileId: result.insertId });
-    });
-});
-
-// 📄 ดึงข้อมูลไฟล์ทั้งหมด
-app.get('/api/files', authenticateToken, (req, res) => {
-    const sql = 'SELECT file_id, file_name, file_type, file_size, file_path, uploaded_by, upload_date FROM files';
-    connection.query(sql, (err, results) => {
-        if (err) return res.status(500).json({ error: 'Database error' });
-        res.json(results);
-    });
-});
-
-// 📄 ดึงข้อมูลไฟล์ตาม ID
-app.get('/api/files/:id', authenticateToken, (req, res) => {
-    const { id } = req.params;
-    const sql = 'SELECT file_id, file_name, file_type, file_size, file_path, uploaded_by, upload_date FROM files WHERE file_id = ?';
-    connection.query(sql, [id], (err, results) => {
-        if (err) return res.status(500).json({ error: 'Database error' });
-        if (results.length === 0) return res.status(404).json({ error: 'File not found' });
-        res.json(results[0]);
-    });
-});
-
-
-// 📥 ดาวน์โหลดไฟล์
-app.get('/api/files/download/:id', authenticateToken, (req, res) => {
-    const { id } = req.params;
-    const sql = 'SELECT file_path, file_name FROM files WHERE file_id = ?';
-    connection.query(sql, [id], (err, results) => {
-        if (err) return res.status(500).json({ error: 'Database error' });
-        if (results.length === 0) return res.status(404).json({ error: 'File not found' });
-
-        const file = results[0];
-        res.download(file.file_path, file.file_name, (err) => {
-            if (err) {
-                res.status(500).json({ error: 'File download failed', details: err });
-            }
-        });
-    });
-});
-
-
-// ❌ ลบไฟล์
-app.delete('/api/files/:id', authenticateToken, (req, res) => {
-    const { id } = req.params;
-
-    // ค้นหาไฟล์ในฐานข้อมูล
-    const sql = 'SELECT file_path FROM files WHERE file_id = ?';
-    connection.query(sql, [id], (err, results) => {
-        if (err) return res.status(500).json({ error: 'Database error' });
-        if (results.length === 0) return res.status(404).json({ error: 'File not found' });
-
-        const file = results[0];
-        
-        // ลบไฟล์จากระบบไฟล์
-        fs.unlink(file.file_path, (err) => {
-            if (err) return res.status(500).json({ error: 'File deletion failed', details: err });
-
-            // ลบข้อมูลไฟล์จากฐานข้อมูล
-            const deleteSql = 'DELETE FROM files WHERE file_id = ?';
-            connection.query(deleteSql, [id], (err, result) => {
-                if (err) return res.status(500).json({ error: 'Database error', details: err });
-                res.json({ message: 'File deleted successfully' });
-            });
-        });
-    });
-});
-
 // ดึงข้อมูลโปรเจคทั้งหมด
 app.get('/api/projects', (req, res) => {
     connection.query('SELECT * FROM project', (err, results) => {
@@ -424,62 +339,232 @@ app.get('/api/projects/department/:departmentId', (req, res) => {
     });
 });
 
-
+app.put('/api/projects/:project_id', async (req, res) => {
+    const { project_id } = req.params;
+    const { status } = req.body;
   
-// เพิ่มโปรเจคใหม่
+    try {
+      const result = await pool.query(
+        'UPDATE project SET status = ? WHERE project_id = ?',
+        [status, project_id]
+      );
+      res.status(200).json({ message: 'Project status updated successfully' });
+    } catch (error) {
+      console.error('Error updating status:', error);
+      res.status(500).json({ error: 'Failed to update status' });
+    }
+  });
+  
+// ➕ สร้างโปรเจค
 app.post('/api/projects', (req, res) => {
     const { project_name, description, department_id } = req.body;
-    connection.query(
-      'INSERT INTO project (project_name, description, department_id) VALUES (?, ?, ?)',
-      [project_name, description, department_id],
-      (err, results) => {
+
+    if (!project_name || !description || !department_id) {
+        return res.status(400).json({ error: 'Project name, description, and department ID are required' });
+    }
+
+    const sql = 'INSERT INTO project (project_name, description, department_id) VALUES (?, ?, ?)';
+    const values = [project_name, description, department_id];
+
+    connection.query(sql, values, (err, result) => {
         if (err) {
-          console.error('Error adding project:', err);
-          return res.status(500).json({ error: 'Failed to add project' });
+            console.error('Error creating project:', err);
+            return res.status(500).json({ error: 'Failed to create project' });
         }
-        res.status(201).json({
-          message: 'Project added successfully',
-          project_id: results.insertId,
-        });
-      }
-    );
-});
-  
-// แก้ไขโปรเจค
-app.put('/api/projects/:id', (req, res) => {
-    const { id } = req.params;
-    const { project_name, description, department_id } = req.body;
-    connection.query(
-      'UPDATE project SET project_name = ?, description = ?, department_id = ? WHERE project_id = ?',
-      [project_name, description, department_id, id],
-      (err, results) => {
-        if (err) {
-          console.error('Error updating project:', err);
-          return res.status(500).json({ error: 'Failed to update project' });
-        }
-        if (results.affectedRows === 0) {
-          return res.status(404).json({ error: 'Project not found' });
-        }
-        res.json({ message: 'Project updated successfully' });
-      }
-    );
-});
-  
-// ลบโปรเจค
-app.delete('/api/projects/:id', (req, res) => {
-    const { id } = req.params;
-    connection.query('DELETE FROM project WHERE project_id = ?', [id], (err, results) => {
-      if (err) {
-        console.error('Error deleting project:', err);
-        return res.status(500).json({ error: 'Failed to delete project' });
-      }
-      if (results.affectedRows === 0) {
-        return res.status(404).json({ error: 'Project not found' });
-      }
-      res.json({ message: 'Project deleted successfully' });
+        res.status(201).json({ message: 'Project created successfully', project_id: result.insertId });
     });
 });
 
+// 📝 แก้ไขโปรเจค
+app.put('/api/projects/:project_id', (req, res) => {
+    const { project_id } = req.params;
+    const { project_name, description, department_id, status } = req.body;
+
+    if (!project_name && !description && !department_id && !status) {
+        return res.status(400).json({ error: 'At least one field (project_name, description, department_id, status) is required to update' });
+    }
+
+    let fields = [];
+    let values = [];
+
+    if (project_name) {
+        fields.push('project_name = ?');
+        values.push(project_name);
+    }
+    if (description) {
+        fields.push('description = ?');
+        values.push(description);
+    }
+    if (department_id) {
+        fields.push('department_id = ?');
+        values.push(department_id);
+    }
+    if (status) {
+        fields.push('status = ?');
+        values.push(status);
+    }
+
+    const sql = `UPDATE project SET ${fields.join(', ')} WHERE project_id = ?`;
+    values.push(project_id);
+
+    connection.query(sql, values, (err, result) => {
+        if (err) {
+            console.error('Error updating project:', err);
+            return res.status(500).json({ error: 'Failed to update project' });
+        }
+        if (result.affectedRows === 0) {
+            return res.status(404).json({ error: 'Project not found' });
+        }
+        res.json({ message: 'Project updated successfully' });
+    });
+});
+
+
+// ❌ ลบโปรเจค
+app.delete('/api/projects/:project_id', (req, res) => {
+    const { project_id } = req.params;
+
+    const sql = 'DELETE FROM project WHERE project_id = ?';
+    connection.query(sql, [project_id], (err, result) => {
+        if (err) {
+            console.error('Error deleting project:', err);
+            return res.status(500).json({ error: 'Failed to delete project' });
+        }
+        if (result.affectedRows === 0) {
+            return res.status(404).json({ error: 'Project not found' });
+        }
+        res.json({ message: 'Project deleted successfully' });
+    });
+});
+
+
+app.post('/api/files', upload.single('file'), (req, res) => {
+    const { uploaded_by, project_id, folder_id } = req.body;
+    const file = req.file;
+
+    if (!file) return res.status(400).json({ error: 'No file uploaded' });
+
+    const sql = `
+        INSERT INTO file (file_name, file_type, file_size, upload_date, uploaded_by, project_id, folder_id)
+        VALUES (?, ?, ?, NOW(), ?, ?, ?)
+    `;
+    const values = [
+        file.filename,
+        file.mimetype,
+        file.size,
+        uploaded_by,
+        project_id,
+        folder_id || null
+    ];
+
+    connection.query(sql, values, (err, result) => {
+        if (err) return res.status(500).json({ error: 'Failed to save file', details: err });
+        res.status(201).json({
+            message: 'File uploaded successfully',
+            file: {
+                file_id: result.insertId,
+                file_name: file.filename,
+                file_type: file.mimetype,
+                file_size: file.size,
+                uploaded_by,
+                project_id,
+                folder_id: folder_id || null
+            }
+        });
+    });
+});
+
+
+
+app.get('/api/files/download/:file_id', (req, res) => {
+    const { file_id } = req.params;
+
+    const sql = 'SELECT * FROM file WHERE file_id = ?';
+    connection.query(sql, [file_id], (err, results) => {
+        if (err || results.length === 0) return res.status(404).json({ error: 'File not found' });
+
+        const file = results[0];
+        const filePath = path.join(__dirname, 'uploads', file.file_name);
+        res.download(filePath, file.file_name);
+    });
+});
+
+
+app.put('/api/files/:file_id', authenticateToken, (req, res) => {
+    const { file_id } = req.params;
+    const { project_id, folder_id } = req.body;
+
+    let fields = [];
+    let values = [];
+
+    if (project_id) {
+        fields.push('project_id = ?');
+        values.push(project_id);
+    }
+
+    if (folder_id) {
+        fields.push('folder_id = ?');
+        values.push(folder_id);
+    }
+
+    if (fields.length === 0) {
+        return res.status(400).json({ error: 'No fields to update' });
+    }
+
+    values.push(file_id);
+    const sql = `UPDATE file SET ${fields.join(', ')} WHERE file_id = ?`;
+
+    connection.query(sql, values, (err, result) => {
+        if (err) return res.status(500).json({ error: 'Failed to update file info' });
+        res.json({ message: 'File info updated successfully' });
+    });
+});
+
+
+app.delete('/api/files/:file_id', authenticateToken, (req, res) => {
+    const { file_id } = req.params;
+
+    const sql = 'SELECT file_name FROM file WHERE file_id = ?';
+    connection.query(sql, [file_id], (err, results) => {
+        if (err || results.length === 0) return res.status(404).json({ error: 'File not found' });
+
+        const filePath = path.join(__dirname, 'uploads', results[0].file_name);
+
+        fs.unlink(filePath, (err) => {
+            if (err) console.warn('⚠️ File deletion failed from storage:', err);
+
+            connection.query('DELETE FROM file WHERE file_id = ?', [file_id], (err, result) => {
+                if (err) return res.status(500).json({ error: 'Failed to delete file' });
+                res.json({ message: 'File deleted successfully' });
+            });
+        });
+    });
+});
+
+
+// ทั้งหมด
+app.get('/api/files', (req, res) => {
+    connection.query('SELECT * FROM file', (err, results) => {
+        if (err) return res.status(500).json({ error: 'Failed to fetch files' });
+        res.json(results);
+    });
+});
+
+// ตาม project_id
+app.get('/api/files/project/:project_id', (req, res) => {
+    connection.query('SELECT * FROM file WHERE project_id = ?', [req.params.project_id], (err, results) => {
+        if (err) return res.status(500).json({ error: 'Failed to fetch project files' });
+        res.json(results);
+    });
+});
+
+// ตาม uploaded_by
+app.get('/api/files/user/:user_id', (req, res) => {
+    connection.query('SELECT * FROM file WHERE uploaded_by = ?', [req.params.user_id], (err, results) => {
+        if (err) return res.status(500).json({ error: 'Failed to fetch user files' });
+        res.json(results);
+    });
+});
 
 
 // 🚀 Start Server

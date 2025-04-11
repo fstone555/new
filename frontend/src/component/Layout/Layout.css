@@ -11,6 +11,13 @@
     border-right: 1px solid #e5e7eb;
     box-shadow: 2px 0 6px rgba(0, 0, 0, 0.05);
     position: relative;
+
   }
 
-  
+  .main{
+    background-color: whitesmoke;
+    min-height: 100vh;
+    min-width: 1370px;
+    margin: 35px;
+    border-radius: 25px;
+  } 

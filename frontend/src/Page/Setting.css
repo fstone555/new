@@ -11,6 +11,7 @@ body {
   margin: 20px 30px;
   margin-bottom: 0;
 }
+
 .setting-container {
   background-color: #ffffff;
   padding: 30px;
@@ -41,7 +42,7 @@ h3 {
 
 /* Add User Form */
 .add-user {
-  background-color: #f5f7fa;
+  /* background-color: #f5f7fa; */
   padding: 20px;
   border-radius: 10px;
   margin-bottom: 30px;
@@ -96,8 +97,7 @@ button:active {
 }
 
 /* Action buttons */
-
-.editt{
+.editt {
   background-color: #0073e6;
 }
 
@@ -142,13 +142,13 @@ button:active {
   overflow: hidden;
 }
 
-.user-table th, .user-table {
+.user-table th, .user-table td {
   border: 1px solid #ddd;
   padding: 12px;
   text-align: left;
 }
 
-td{
+td {
   border-bottom: 1px solid #ddd;
   padding: 12px;
   text-align: left;
@@ -213,4 +213,42 @@ td{
   max-height: 400px; /* หรือค่าที่เหมาะสมกับหน้าจอ */
   overflow-y: auto;
   margin-top: 10px;
+}
+
+/* Project Grid Layout */
+.departments-grid {
+  display: grid;
+  grid-template-columns: repeat(5, 1fr); /* แสดง 5 ช่องในหน้าจอใหญ่ */
+  gap: 24px;
+  justify-items: center;
+  align-items: stretch;
+  padding: 0 20px;
+}
+
+/* หน้าจอไม่เกิน 1200px: ลดเหลือ 4 คอลัมน์ */
+@media (max-width: 1000px) {
+  .departments-grid {
+    grid-template-columns: repeat(4, 1fr);
+  }
+}
+
+/* หน้าจอไม่เกิน 992px: เหลือ 3 คอลัมน์ */
+@media (max-width: 992px) {
+  .departments-grid {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}
+
+/* หน้าจอไม่เกิน 768px: เหลือ 2 คอลัมน์ */
+@media (max-width: 768px) {
+  .departments-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+/* หน้าจอไม่เกิน 480px: เหลือ 1 คอลัมน์ */
+@media (max-width: 480px) {
+  .departments-grid {
+    grid-template-columns: 1fr;
+  }
 }

@@ -1,74 +1,80 @@
-.home-container {
-    padding: 2rem;
-    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-    
-}
+/* เพิ่มการตั้งค่า CSS สำหรับ Home.js */
 
-h1 {
+.home-container {
+    padding: 20px;
     text-align: center;
-    font-size: 3rem;
-    font-weight: bold;
-    color: #1f2937;
-    margin-bottom: 1.5rem;
 }
 
 h2 {
-    font-size: 1.8rem;
-    color: #374151;
-    margin-top: 1.5rem;
-    border-bottom: 2px solid #e5e7eb;
-    padding-bottom: 0.5rem;
+    font-size: 28px;
+  color: #333;
+  margin-bottom: 20px;
+  font-weight: bold;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+
 }
 
 .departments-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); /* Responsive grid */
-    gap: 1.5rem;
-    margin-top: 2rem;
+    grid-template-columns: repeat(5, 1fr); /* กำหนดให้มี 5 คอลัมน์เสมอ */
+    gap: 20px;
+    justify-items: center;
 }
 
+
 .department-card {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    text-decoration: none;
-    background-color: #f9fafb;
-    padding: 1.2rem;
-    border-radius: 12px;
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
-    transition: all 0.2s ease;
+    background-color: #f5f5f5;
+    border-radius: 8px;
+    padding: 20px;
+    width: 180px;
+    height: 180px;
+    text-align: center;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    transition: transform 0.2s ease-in-out;
 }
 
 .department-card:hover {
-    transform: translateY(-4px);
-    background-color: #e0f2fe;
-    box-shadow: 0 6px 16px rgba(0, 0, 0, 0.08);
+    transform: translateY(-10px); /* เพิ่มการเคลื่อนไหวเมื่อมีการ hover */
+}
+
+.folder-icon img {
+    width: 100px;
+    height: 100px;
+    margin-bottom: 10px;
 }
 
 .department-link {
     font-size: 1.2rem;
     font-weight: bold;
-    color: #1f2937;
+    color: #333;
     text-decoration: none;
-    transition: color 0.3s;
+    display: block;
 }
 
 .department-link:hover {
-    color: #3b82f6;
+    color: #007bff; /* เมื่อ hover จะเปลี่ยนสี */
 }
 
 .error-message {
     color: red;
-    font-weight: bold;
-    text-align: center;
+    font-size: 1.2rem;
+}
+
+@media (max-width: 1200px) {
+    .departments-grid {
+        grid-template-columns: repeat(3, 1fr);
+    }
+}
+
+@media (max-width: 768px) {
+    .departments-grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
 }
 
 @media (max-width: 480px) {
-    h1 {
-        font-size: 2rem;
-    }
-
-    .department-card {
-        padding: 1rem;
+    .departments-grid {
+        grid-template-columns: 1fr;
     }
 }

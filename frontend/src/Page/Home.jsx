@@ -7,7 +7,7 @@ function Home() {
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
 
-    // ดึงข้อมูลแผนกจาก API เมื่อคอมโพเนนต์โหลด
+    // ฟังก์ชันเพื่อดึงข้อมูลแผนกจาก API
     useEffect(() => {
         const fetchDepartments = async () => {
             try {
@@ -26,16 +26,22 @@ function Home() {
 
     return (
         <div className="home-container">
-            <h1>Home</h1>
             <h2>Departments</h2>
 
+            {/* แสดงข้อความขณะกำลังโหลดข้อมูล */}
             {loading && <p>Loading departments...</p>}
+
+            {/* แสดงข้อความเมื่อมีข้อผิดพลาด */}
             {error && <p className="error-message">{error}</p>}
 
+            {/* แสดงข้อมูลแผนก */}
             <div className="departments-grid">
                 {departments.length > 0 ? (
                     departments.map((department) => (
                         <div key={department.department_id} className="department-card">
+                            <div className="folder-icon">
+                                <img src="/img/folder2.svg" alt="Folder Icon" />
+                            </div>
                             <Link to={`/projects/${department.department_id}`} className="department-link">
                                 {department.department_name}
                             </Link>

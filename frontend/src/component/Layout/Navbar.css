@@ -1,66 +1,15 @@
-.navbar{
+.full {
+    display: flex;
+    height: 100vh;
+    overflow: hidden;
+  }
+  
+  .navbar {
+    width: 270px;
     height: 100vh;
     background-color: white;
-    display: flexed;
- 
-}
-.navbar-list {
-    list-style-type: none;  /* ไม่ใช้จุดหน้ารายการ */
-    padding: 20px;
-    margin: 0;
-    border-radius: 25px;
-    width: 70%;  /* ใช้ความกว้างทั้งหมด */
-}
-
-.navbar-list li {
-    margin: 10px 0;  /* ช่องว่างระหว่างรายการเมนู */
-}
-
-.navbar-list li a {
-    display: block;  /* ทำให้ลิงก์เต็มความกว้าง */
-    padding: 10px 20px;  /* ช่องว่างในลิงก์ */
-    color: #333;  /* สีตัวอักษร */
-    font-weight: 500;  /* ความหนาของตัวอักษร */
-    font-size: 16px;
-    text-decoration: none;  /* เอาเส้นใต้ของลิงก์ออก */
-    border-radius: 8px;  /* มุมโค้ง */
-    transition: background-color 0.3s, color 0.3s;  /* ทำให้การเปลี่ยนสีเนียนขึ้น */
-}
-
-
-.navbar-list li :focus,
-.navbar-list li :active,
-.navbar-list li a:active,
-.navbar-list li a.active {
-    width: 190px;
-    border-radius: 25px;
-    background-color: rgba(38, 22, 144);  /* สีพื้นหลังของลิงก์ที่กําลังใช้งาน */
-    color: white;  /* สีตัวอักษรของลิงก์ที่กําลังใช้งาน */
-}
-
-/* สไตล์ของปุ่ม Logout */
-.navbar-list button {
-    padding: 10px 20px;
-    color: #ff4d4d;  /* สีแดง */
-    font-size: 16px;
-    border-radius: 25px;
-    background: none;
-    cursor: pointer;
-    text-decoration: none;
-    transition: color 0.3s, background-color 0.3s;
-}
-
-/* สไตล์เมื่อโฮเวอร์ที่ปุ่ม Logout */
-.navbar-list button:hover {
-    color: #e60000;  /* สีแดงเข้มเมื่อโฮเวอร์ */
-    background-color: #f8d7da;  /* พื้นหลังอ่อนๆ เมื่อโฮเวอร์ */
-    border-radius: 8px;  /* มุมโค้ง */
-}
-
-.main {
-    flex-grow: 1; /* main content จะขยายเพื่อใช้พื้นที่ที่เหลือ */
-    padding: 20px;
-    overflow-y: auto; /* ให้เนื้อหาสามารถเลื่อนขึ้นลงได้ */
-    background-color: #f7f7f7; /* เลือกสีพื้นหลังของเนื้อหา */
-    height: 100vh; /* กำหนดความสูงเต็มหน้าจอ */
+    border-right: 1px solid #e5e7eb;
+    box-shadow: 2px 0 6px rgba(0, 0, 0, 0.05);
+    position: relative;
   }
+
