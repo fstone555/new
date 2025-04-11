@@ -12,6 +12,8 @@ const app = express();
 const port = 3000;
 
 
+
+
 const secretKey = process.env.JWT_SECRET;
 if (!secretKey) {
     console.error('❌ JWT_SECRET is not defined in .env file');
