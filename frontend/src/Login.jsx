@@ -58,7 +58,7 @@ function Login({ setToken }) {
           className="logo"
         />
         <h2>Login</h2>
-
+        <div className='input-container'>
         <input
           className="input"
           type="text"
@@ -76,7 +76,7 @@ function Login({ setToken }) {
           onChange={(e) => setPassword(e.target.value)}
           onKeyDown={handleKeyDown}
         />
-
+        </div>
         <button className="Login" onClick={loginUser} disabled={loading}>
           {loading ? 'Logging in...' : 'Sign In'}
         </button>
