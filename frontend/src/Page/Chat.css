@@ -1,16 +1,16 @@
-/* Chat.css */
-
 .chat-container {
     display: flex;
     height: 100vh;
-  }
+    overflow: hidden; /* ห้ามเลื่อนที่ container หลัก */
+}
   
-  .chat-sidebar {
+.chat-sidebar {
     width: 300px;
     background-color: #f4f4f4;
     padding: 10px;
-    overflow-y: auto;
-  }
+    overflow-y: auto; /* ให้เลื่อนเฉพาะเมื่อจำเป็น */
+    overflow-x: hidden;
+}
   
   .sidebar-title {
     font-size: 1.5rem;
@@ -22,7 +22,7 @@
   }
   
   .search-input {
-    width: 100%;
+    width: 95%;
     padding: 8px;
     border-radius: 5px;
     border: 1px solid #ccc;
@@ -71,48 +71,78 @@
   
   .chat-box {
     flex: 1;
-    padding: 20px;
-    background-color: #fff;
     display: flex;
     flex-direction: column;
-  }
+    background-color: #fff;
+    overflow: hidden; /* ห้ามเลื่อนในนี้ */
+}
   
   .chat-header {
     font-size: 1.5rem;
-    margin-bottom: 20px;
+    padding: 30px 20px 30px 20px;
+    margin-top: 0px;
+    background-color: #ff6c2c;
+    color: #ffffff;
   }
   
   .chat-messages {
     flex: 1;
-    overflow-y: auto;
+    overflow-y: auto; /* เลื่อนเฉพาะเมื่อข้อความเยอะ */
+    overflow-x: hidden;
+    padding-left: 20px;
+    padding-right: 20px;
+    min-height: 200px;
     margin-bottom: 20px;
-  }
+    scrollbar-gutter: stable;
+}
   
   .message-item {
     margin-bottom: 10px;
     padding: 10px;
-    border-radius: 8px;
+    border-radius: 15px;
     background-color: #f0f0f0;
-    max-width: 70%;
+    position: relative;
+    width: fit-content;
+    word-wrap: break-word;
   }
   
-  .message-item.self {
-    background-color: #d1f7c4; /* สีสำหรับข้อความของเรา */
-    align-self: flex-end; /* ข้อความของเราไปทางขวา */
+  /* ฝั่งเราสend (ขวา) */
+.message-item.self {
+    background-color: #dcf8c6;
+    align-self: flex-end;
     margin-left: auto;
+    border-bottom-right-radius: 4px;
   }
   
-  .message-item.other {
+  .message-item.self::after {
+    content: "";
+    position: absolute;
+    right: -8px;
+    bottom: 0;
+    width: 0;
+    height: 0;
+    border-top: 10px solid #dcf8c6 ;
+  }
+  
+  /* ฝั่งคู่สนทนา (ซ้าย) */
+.message-item.other {
     background-color: #ffffff;
-    align-self: flex-start; /* ข้อความของคนที่เราคุยอยู่ไปทางซ้าย */
+    align-self: flex-start;
+    border-bottom-left-radius: 4px ;
   }
   
-  .no-messages {
-    font-size: 1.2rem;
-    color: #777;
+  .message-item.other::after {
+    content: "";
+    position: absolute;
+    left: -8px;
+    bottom: 0;
+    width: 0;
+    height: 0;
+    border-top: 10px solid #ffffff;
+    border-right: 10px solid transparent;
   }
   
-  .no-user-selected {
+  .no-messages, .no-user-selected {
     font-size: 1.2rem;
     color: #777;
     text-align: center;
@@ -122,17 +152,19 @@
   .message-input-area {
     display: flex;
     gap: 10px;
+    margin-bottom: 20px;
+    padding: 0px 10px 0px 10px; 
   }
   
-  .message-input {
-    width: 100%;
-    padding: 10px;
-    border-radius: 5px;
-    border: 1px solid #ccc;
-  }
+  .message-input-area {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 20px;
+    padding: 0px 10px 0px 10px; 
+}
   
   .send-button {
-    padding: 10px 20px;
+    height: 40px;
     background-color: #4CAF50;
     color: white;
     border: none;

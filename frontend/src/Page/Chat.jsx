@@ -10,17 +10,13 @@ function Chat() {
   const [searchTerm, setSearchTerm] = useState('');
   const messagesEndRef = useRef(null);
 
-  const userId = Number(localStorage.getItem('userId')); // ตรวจสอบ userId ใน localStorage
-  const currentUserRole = localStorage.getItem('role'); // ตรวจสอบ role ใน localStorage
+  const userId = Number(localStorage.getItem('userId'));
+  const currentUserRole = localStorage.getItem('role');
 
   useEffect(() => {
-    // ตรวจสอบค่า role และ userId ที่เก็บใน localStorage
-    console.log("User role:", currentUserRole);
-    console.log("User ID:", userId);
-
     if (!currentUserRole || !userId) {
-      console.error("ข้อมูลผู้ใช้ไม่ถูกต้องใน localStorage");
-      return; // หากไม่มีข้อมูลจะไม่ทำงาน
+      console.error("Invalid user data in localStorage");
+      return;
     }
 
     axios.get('http://localhost:3000/api/users')
@@ -45,12 +41,19 @@ function Chat() {
   }, [selectedUser]);
 
   useEffect(() => {
-    scrollToBottom();
+    // เมื่อมีการส่งข้อความใหม่ให้เลื่อนเฉพาะเมื่อข้อความใหม่มีการเพิ่มเข้ามา
+    if (messages.length > 0) {
+      scrollToBottom();
+    }
   }, [messages]);
 
-  const scrollToBottom = () => {
-    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
-  };
+const scrollToBottom = () => {
+    const messagesEnd = messagesEndRef.current;
+    if (messagesEnd) {
+      messagesEnd.scrollIntoView({ behavior: 'smooth', block: 'end' });
+    }
+};
+
 
   const handleSendMessage = () => {
     if (newMessage.trim()) {
@@ -74,12 +77,15 @@ function Chat() {
     }
   };
 
-  // กรองผู้ใช้ที่แสดงตามบทบาท
   const filteredUsers = users.filter((user) => {
+    const fullName = `${user.firstname} ${user.lastname}`.toLowerCase();
+    const username = user.username.toLowerCase();
+    const term = searchTerm.toLowerCase();
+
     if (currentUserRole === 'user') {
-      return user.role === 'admin';  // user จะเห็นแค่ admin
+      return user.role === 'admin' && (fullName.includes(term) || username.includes(term));
     } else if (currentUserRole === 'admin') {
-      return true;  // admin จะเห็นทุกรายชื่อผู้ใช้
+      return fullName.includes(term) || username.includes(term);
     }
     return false;
   });
@@ -87,11 +93,12 @@ function Chat() {
   return (
     <div className="chat-container">
       <div className="chat-sidebar">
-        <h2 className="sidebar-title">👥 รายชื่อผู้ใช้</h2>
+        
+        <h2 className="sidebar-title">User List</h2>
         <div className="search-bar">
           <input
             type="text"
-            placeholder="ค้นหาชื่อหรือ username"
+            placeholder="Search name or username"
             className="search-input"
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
@@ -113,15 +120,15 @@ function Chat() {
               </div>
             ))
           ) : (
-            <p className="no-user">ไม่พบผู้ใช้</p>
+            <p className="no-user">No users found</p>
           )}
         </div>
       </div>
 
-      <div className="chat-box">
+      <div className="chat-box" key={selectedUser?.user_id}>
         {selectedUser ? (
           <>
-            <h2 className="chat-header">💬 แชทกับ {selectedUser.firstname} {selectedUser.lastname}</h2>
+            <h2 className="chat-header">{selectedUser.firstname} {selectedUser.lastname}</h2>
             <div className="chat-messages">
               {messages.length > 0 ? (
                 messages.map((message, index) => (
@@ -136,23 +143,23 @@ function Chat() {
                   </div>
                 ))
               ) : (
-                <p className="no-messages">ยังไม่มีข้อความ...</p>
+                <p className="no-messages">No messages yet...</p>
               )}
               <div ref={messagesEndRef} />
             </div>
             <div className="message-input-area">
               <input
                 type="text"
-                placeholder="พิมพ์ข้อความ..."
+                placeholder="Type a message..."
                 className="message-input"
                 value={newMessage}
                 onChange={(e) => setNewMessage(e.target.value)}
               />
-              <button className="send-button" onClick={handleSendMessage}>ส่ง</button>
+              <button className="send-button" onClick={handleSendMessage}>Send</button>
             </div>
           </>
         ) : (
-          <div className="no-user-selected">🟡 กรุณาเลือกผู้ใช้เพื่อเริ่มแชท</div>
+          <div className="no-user-selected">🟡 Please select a user to start chatting</div>
         )}
       </div>
     </div>
