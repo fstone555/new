@@ -1,0 +1,146 @@
+/* Chat.css */
+
+.chat-container {
+    display: flex;
+    height: 100vh;
+  }
+  
+  .chat-sidebar {
+    width: 300px;
+    background-color: #f4f4f4;
+    padding: 10px;
+    overflow-y: auto;
+  }
+  
+  .sidebar-title {
+    font-size: 1.5rem;
+    margin-bottom: 15px;
+  }
+  
+  .search-bar {
+    margin-bottom: 20px;
+  }
+  
+  .search-input {
+    width: 100%;
+    padding: 8px;
+    border-radius: 5px;
+    border: 1px solid #ccc;
+  }
+  
+  .user-list {
+    margin-top: 20px;
+  }
+  
+  .user-item {
+    display: flex;
+    align-items: center;
+    padding: 10px;
+    border-radius: 8px;
+    cursor: pointer;
+    margin-bottom: 10px;
+  }
+  
+  .user-item:hover {
+    background-color: #ddd;
+  }
+  
+  .selected {
+    background-color: #e0e0e0;
+  }
+  
+  .avatar {
+    background-color: #ccc;
+    border-radius: 50%;
+    width: 40px;
+    height: 40px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-right: 10px;
+  }
+  
+  .user-info .user-name {
+    font-weight: bold;
+  }
+  
+  .user-info .user-username {
+    font-size: 0.9rem;
+    color: #777;
+  }
+  
+  .chat-box {
+    flex: 1;
+    padding: 20px;
+    background-color: #fff;
+    display: flex;
+    flex-direction: column;
+  }
+  
+  .chat-header {
+    font-size: 1.5rem;
+    margin-bottom: 20px;
+  }
+  
+  .chat-messages {
+    flex: 1;
+    overflow-y: auto;
+    margin-bottom: 20px;
+  }
+  
+  .message-item {
+    margin-bottom: 10px;
+    padding: 10px;
+    border-radius: 8px;
+    background-color: #f0f0f0;
+    max-width: 70%;
+  }
+  
+  .message-item.self {
+    background-color: #d1f7c4; /* สีสำหรับข้อความของเรา */
+    align-self: flex-end; /* ข้อความของเราไปทางขวา */
+    margin-left: auto;
+  }
+  
+  .message-item.other {
+    background-color: #ffffff;
+    align-self: flex-start; /* ข้อความของคนที่เราคุยอยู่ไปทางซ้าย */
+  }
+  
+  .no-messages {
+    font-size: 1.2rem;
+    color: #777;
+  }
+  
+  .no-user-selected {
+    font-size: 1.2rem;
+    color: #777;
+    text-align: center;
+    margin-top: 50px;
+  }
+  
+  .message-input-area {
+    display: flex;
+    gap: 10px;
+  }
+  
+  .message-input {
+    width: 100%;
+    padding: 10px;
+    border-radius: 5px;
+    border: 1px solid #ccc;
+  }
+  
+  .send-button {
+    padding: 10px 20px;
+    background-color: #4CAF50;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+  }
+  
+  .send-button:hover {
+    background-color: #45a049;
+  }
+  

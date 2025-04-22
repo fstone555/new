@@ -8,10 +8,14 @@ const multer = require('multer');
 const path = require('path');
 const fs = require('fs');
 
+const bodyParser = require('body-parser');
+
+
 const app = express();
 const port = 3000;
+app.use(bodyParser.json());
 
-
+  
 
 
 const secretKey = process.env.JWT_SECRET;
@@ -43,7 +47,7 @@ const upload = multer({ storage: storage });
 const connection = mysql.createConnection({
     host: 'localhost',
     user: 'root',
-    password: '',
+    password: '12345',
     database: '102'
 });
 
@@ -72,11 +76,7 @@ function authenticateToken(req, res, next) {
     });
 }
 
-
-  
-
-// 🔓 Login Endpoint
-// 🔓 Login Endpoint
+  // 🔓 Login Endpoint
 app.post('/api/login', (req, res) => {
     const { username, password } = req.body;
     const sql = 'SELECT * FROM user WHERE username = ?';
@@ -139,13 +139,19 @@ app.get('/api/health', (req, res) => {
 
 
 // 📄 ดึงผู้ใช้ทั้งหมด
-app.get('/api/users',(req, res) => {
+// Node.js API
+app.get('/api/users', (req, res) => {
     const sql = 'SELECT user_id, username, firstname, lastname, email, role, department_id FROM user';
     connection.query(sql, (err, results) => {
-        if (err) return res.status(500).json({ error: 'Database error' });
-        res.json(results);
+      if (err) {
+        console.error('Database error:', err);
+        return res.status(500).json({ error: 'Database error' });
+      }
+      res.json(results);  // ตอบกลับในรูปแบบ JSON
     });
-});
+  });
+  
+  
 
 // 📄 ดึงผู้ใช้ตาม ID
 app.get('/api/users/:id', (req, res) => {
@@ -567,6 +573,237 @@ app.get('/api/files/user/:user_id', (req, res) => {
         res.json(results);
     });
 });
+
+// ส่งข้อความทั่วไป (user → admin หรือ user ↔ user)
+app.post('/api/chat/send-message', async (req, res) => {
+    const { sender_id, receiver_id, message_text } = req.body;
+
+    if (!message_text || !receiver_id || !sender_id) {
+        return res.status(400).json({ error: 'Message text, sender_id, and receiver_id are required' });
+    }
+
+    try {
+        // ตรวจสอบ role ของ sender
+        const [senderResult] = await db.query('SELECT role FROM user WHERE user_id = ?', [sender_id]);
+        const [receiverResult] = await db.query('SELECT role FROM user WHERE user_id = ?', [receiver_id]);
+
+        if (senderResult.length === 0 || receiverResult.length === 0) {
+            return res.status(404).json({ error: 'Sender or receiver not found' });
+        }
+
+        const senderRole = senderResult[0].role;
+        const receiverRole = receiverResult[0].role;
+
+        // ❌ ไม่อนุญาตให้ user คุยกับ user
+        if (senderRole === 'user' && receiverRole === 'user') {
+            return res.status(403).json({ error: 'Users can only chat with admin' });
+        }
+
+        // ✅ ดำเนินการสร้างหรือหาการสนทนา
+        let conversationId;
+        const [existingConversation] = await db.query(`
+            SELECT * FROM conversations 
+            WHERE (user1_id = ? AND user2_id = ?) OR (user1_id = ? AND user2_id = ?)
+        `, [sender_id, receiver_id, receiver_id, sender_id]);
+
+        if (existingConversation.length > 0) {
+            conversationId = existingConversation[0].conversation_id;
+        } else {
+            const result = await db.query(`
+                INSERT INTO conversations (user1_id, user2_id, created_at)
+                VALUES (?, ?, NOW())
+            `, [sender_id, receiver_id]);
+            conversationId = result.insertId;
+        }
+
+        const [messageResult] = await db.query(`
+            INSERT INTO messages (sender_id, receiver_id, message_text, timestamp, is_read, message_type, file_url, conversation_id)
+            VALUES (?, ?, ?, NOW(), 0, 'text', NULL, ?)
+        `, [sender_id, receiver_id, message_text, conversationId]);
+
+        const newMessageId = messageResult.insertId;
+
+        await db.query(`UPDATE conversations SET last_message_id = ? WHERE conversation_id = ?`, [newMessageId, conversationId]);
+
+        res.status(200).json({ message: 'Message sent successfully', message_id: newMessageId });
+
+    } catch (err) {
+        console.error(err);
+        res.status(500).json({ error: 'Error sending message' });
+    }
+});
+
+
+
+// ฟังก์ชันดึง role
+function getUserRole(userId) {
+    return new Promise((resolve, reject) => {
+        connection.query('SELECT role FROM user WHERE user_id = ?', [userId], (err, results) => {
+            if (err) return reject(err);
+            if (results.length === 0) return reject("User not found");
+            resolve(results[0].role);
+        });
+    });
+}
+
+
+// function getAdminId() {
+//     return new Promise((resolve, reject) => {
+//         const sql = "SELECT User_id FROM user WHERE role = 'admin' LIMIT 1";
+//         connection.query(sql, (err, results) => {
+//             if (err) return reject(err);
+//             if (results.length === 0) return reject("Admin not found");
+//             resolve(results[0].User_id);
+//         });
+//     });
+// }
+
+const sendMessage = async () => {
+    if (!messageText.trim()) return;
+
+    try {
+        console.log({
+            sender_id: senderId,
+            receiver_id: receiverId,
+            message_text: messageText
+        });
+
+        const response = await axios.post('http://localhost:3000/api/chat/send-message', {
+            sender_id: senderId,
+            receiver_id: receiverId,
+            message_text: messageText
+        });
+
+        console.log('Message sent:', response.data);
+
+        setMessages(prev => [...prev, {
+            sender_id: senderId,
+            receiver_id: receiverId,
+            message_text: messageText,
+            timestamp: new Date().toISOString()
+        }]);
+
+        setMessageText('');
+    } catch (error) {
+        console.error("Error sending message:", error.response ? error.response.data : error);
+    }
+};
+
+
+app.get('/api/chat/messages/:senderId/:receiverId', async (req, res) => {
+    const { senderId, receiverId } = req.params;
+
+    try {
+        const sql = `
+            SELECT sender_id, receiver_id, message_text, timestamp 
+            FROM messages 
+            WHERE (sender_id = ? AND receiver_id = ?) 
+            OR (sender_id = ? AND receiver_id = ?)
+            ORDER BY timestamp ASC
+        `;
+        
+        connection.query(sql, [senderId, receiverId, receiverId, senderId], (err, results) => {
+            if (err) {
+                console.error(err);
+                return res.status(500).json({ error: 'Error fetching messages' });
+            }
+
+            // ส่งข้อความทั้งหมดที่ดึงได้
+            res.status(200).json({ messages: results });
+        });
+    } catch (err) {
+        console.error(err);
+        res.status(500).json({ error: 'An error occurred' });
+    }
+});
+
+app.get('/api/chat/conversations/:userId', (req, res) => {
+    const userId = req.params.userId;
+
+    const sql = `
+        SELECT 
+            u.user_id, u.username, m.message_text AS last_message, m.timestamp
+        FROM users u
+        JOIN (
+            SELECT 
+                IF(sender_id = ?, receiver_id, sender_id) AS partner_id,
+                MAX(message_id) AS last_msg_id
+            FROM messages
+            WHERE sender_id = ? OR receiver_id = ?
+            GROUP BY partner_id
+        ) AS last_msgs ON last_msgs.partner_id = u.user_id
+        JOIN messages m ON m.message_id = last_msgs.last_msg_id
+        ORDER BY m.timestamp DESC
+    `;
+
+    connection.query(sql, [userId, userId, userId], (err, results) => {
+        if (err) return res.status(500).json({ error: 'Error fetching conversations' });
+        res.status(200).json({ conversations: results });
+    });
+});
+
+app.patch('/api/chat/mark-read', (req, res) => {
+    const { sender_id, receiver_id } = req.body;
+
+    const sql = `
+        UPDATE messages 
+        SET is_read = 1 
+        WHERE sender_id = ? AND receiver_id = ? AND is_read = 0
+    `;
+
+    connection.query(sql, [sender_id, receiver_id], (err, result) => {
+        if (err) return res.status(500).json({ error: 'Failed to mark messages as read' });
+        res.status(200).json({ message: 'Messages marked as read' });
+    });
+});
+
+
+app.get('/api/chat/unread-count/:userId', (req, res) => {
+    const userId = req.params.userId;
+
+    const sql = `
+        SELECT COUNT(*) AS unread_count 
+        FROM messages 
+        WHERE receiver_id = ? AND is_read = 0
+    `;
+
+    connection.query(sql, [userId], (err, results) => {
+        if (err) return res.status(500).json({ error: 'Failed to count unread messages' });
+        res.status(200).json(results[0]);
+    });
+});
+
+
+app.delete('/api/chat/message/:messageId', (req, res) => {
+    const messageId = req.params.messageId;
+
+    const sql = 'DELETE FROM messages WHERE message_id = ?';
+
+    connection.query(sql, [messageId], (err, result) => {
+        if (err) return res.status(500).json({ error: 'Failed to delete message' });
+        res.status(200).json({ message: 'Message deleted successfully' });
+    });
+});
+
+app.post('/api/chat/send', (req, res) => {
+    const { sender_id, receiver_id, message_text, message_type, file_url } = req.body;
+
+    const sql = `
+        INSERT INTO messages (sender_id, receiver_id, message_text, timestamp, is_read, message_type, file_url)
+        VALUES (?, ?, ?, NOW(), 0, ?, ?)
+    `;
+
+    connection.query(sql, [sender_id, receiver_id, message_text, message_type || 'text', file_url || null], (err, result) => {
+        if (err) return res.status(500).json({ error: 'Failed to send message' });
+
+        res.status(201).json({ message: 'Message sent successfully', message_id: result.insertId });
+    });
+});
+
+
+
+
+
 
 
 // 🚀 Start Server
