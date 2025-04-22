@@ -10,7 +10,8 @@ import Noti from './Page/Noti';
 import Setting from './Page/Setting';
 import Login from './Login';
 import Projects from './Page/Projects';
-import Chat from './Page/Chat'; // ✅ import จากไฟล์ใหม่
+import Chat from './Page/Chat';
+import Dashboard from './Page/Dashboard';
 
 function App() {
   const [token, setToken] = useState(() => localStorage.getItem('token'));
@@ -35,6 +36,7 @@ function App() {
           <Route path="/bookmark" element={<Bookmark />} />
           <Route path="/noti" element={<Noti />} />
           <Route path="/setting" element={<Setting />} />
+          <Route path="/dashboard" element={<Dashboard />} />
           <Route path="/projects/:departmentId" element={<Projects />} />
           <Route path="/chat" element={<Chat />} /> {/* ✅ ใส่ route แชตตรงนี้ */}
         </Route>
