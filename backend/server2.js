@@ -304,6 +304,21 @@ app.get('/api/departments/:id', (req, res) => {
     });
 });
 
+// 📄 ดึงจำนวนผู้ใช้ต่อแผนก
+app.get('/api/users-per-department', (req, res) => {
+    const sql = `
+      SELECT d.department_name, COUNT(u.user_id) AS user_count
+      FROM department d
+      LEFT JOIN user u ON d.department_id = u.department_id
+      GROUP BY d.department_id
+      ORDER BY user_count DESC
+    `;
+    connection.query(sql, (err, results) => {
+      if (err) return res.status(500).json({ error: 'Database error' });
+      res.json(results);
+    });
+  });
+  
 
 
 // ดึงข้อมูลโปรเจคทั้งหมด
