@@ -5,7 +5,7 @@ body{
     margin: 0;
 }
 .setting-container {
-    overflow-y: auto;
+    overflow-y: 100vh;
     max-width: 100vw;
     max-height: 100vh; /* กำหนดความสูงสูงสุดที่ 100% ของหน้าจอ */
     border-radius: 12px;

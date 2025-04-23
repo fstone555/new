@@ -9,13 +9,13 @@ import Bookmark from './Page/Bookmark';
 import Noti from './Page/Noti';
 import Setting from './Page/Setting';
 import Login from './Login';
-import HR from './Department/HR';
 import Projects from './Page/Projects';
+import Chat from './Page/Chat';
+import Dashboard from './Page/Dashboard';
 
 function App() {
   const [token, setToken] = useState(() => localStorage.getItem('token'));
 
-  // เช็คสิทธิ์การเข้าถึงหน้าที่ต้องล็อกอิน
   const ProtectedRoute = ({ children }) => {
     return token ? children : <Navigate to="/login" replace />;
   };
@@ -23,13 +23,8 @@ function App() {
   return (
     <Router>
       <Routes>
-        {/* Default route */}
         <Route path="/" element={<Navigate to={token ? "/home" : "/login"} />} />
-
-        {/* Login page */}
         <Route path="/login" element={<Login setToken={setToken} />} />
-
-        {/* Protected Routes */}
         <Route
           element={
             <ProtectedRoute>
@@ -41,7 +36,9 @@ function App() {
           <Route path="/bookmark" element={<Bookmark />} />
           <Route path="/noti" element={<Noti />} />
           <Route path="/setting" element={<Setting />} />
-          <Route path="/projects/:departmentId" element={<Projects />} /> {/* เปลี่ยนจาก HR เป็น Projects */}
+          <Route path="/dashboard" element={<Dashboard />} />
+          <Route path="/projects/:departmentId" element={<Projects />} />
+          <Route path="/chat" element={<Chat />} /> {/* ✅ ใส่ route แชตตรงนี้ */}
         </Route>
       </Routes>
     </Router>
