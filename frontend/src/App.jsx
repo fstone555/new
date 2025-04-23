@@ -12,6 +12,8 @@ import Login from './Login';
 import Projects from './Page/Projects';
 import Chat from './Page/Chat';
 import Dashboard from './Page/Dashboard';
+import Create from './Page/create';
+import Edit from './Page/edit';
 
 function App() {
   const [token, setToken] = useState(() => localStorage.getItem('token'));
@@ -38,6 +40,8 @@ function App() {
           <Route path="/setting" element={<Setting />} />
           <Route path="/dashboard" element={<Dashboard />} />
           <Route path="/projects/:departmentId" element={<Projects />} />
+          <Route path="/projects/create/:departmentId" element={<Create />} /> 
+          <Route path="/projects/edit/:project_id" element={<Edit />} />
           <Route path="/chat" element={<Chat />} /> {/* ✅ ใส่ route แชตตรงนี้ */}
         </Route>
       </Routes>

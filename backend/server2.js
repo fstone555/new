@@ -46,9 +46,9 @@ const upload = multer({ storage: storage });
 // ✅ MySQL Connection
 const connection = mysql.createConnection({
     host: 'localhost',
-    user: 'root',
-    password: '',
-    database: '111'
+    user: 'project',
+    password: '1234',
+    database: '102'
 });
 
 connection.connect(err => {
@@ -333,9 +333,9 @@ app.get('/api/projects', (req, res) => {
 });
   
 // ดึงข้อมูลโปรเจคตาม ID
-app.get('/api/projects/:id', (req, res) => {
-    const { id } = req.params;
-    connection.query('SELECT * FROM project WHERE project_id = ?', [id], (err, results) => {
+app.get('/api/projects/:project_id', (req, res) => {
+    const {  project_id } = req.params;
+    connection.query('SELECT * FROM project WHERE project_id = ?', [project_id], (err, results) => {
       if (err) {
         console.error('Error fetching project:', err);
         return res.status(500).json({ error: 'Failed to fetch project' });
@@ -366,16 +366,20 @@ app.put('/api/projects/:project_id', async (req, res) => {
     const { project_id } = req.params;
     const { status } = req.body;
   
-    try {
-      const result = await pool.query(
-        'UPDATE project SET status = ? WHERE project_id = ?',
-        [status, project_id]
-      );
+    const sql = 'UPDATE project SET status = ? WHERE project_id = ?';
+
+    connection.query(sql, [status, project_id], (err, result) => {
+      if (err) {
+        console.error('Error updating status:', err);
+        return res.status(500).json({ error: 'Failed to update status' });
+      }
+  
+      if (result.affectedRows === 0) {
+        return res.status(404).json({ error: 'Project not found' });
+      }
+  
       res.status(200).json({ message: 'Project status updated successfully' });
-    } catch (error) {
-      console.error('Error updating status:', error);
-      res.status(500).json({ error: 'Failed to update status' });
-    }
+    });
   });
   
 // ➕ สร้างโปรเจค
@@ -432,7 +436,7 @@ app.put('/api/projects/:project_id', (req, res) => {
 
     connection.query(sql, values, (err, result) => {
         if (err) {
-            console.error('Error updating project:', err);
+            console.error('Error updating project:', err.message, err.sqlMessage);
             return res.status(500).json({ error: 'Failed to update project' });
         }
         if (result.affectedRows === 0) {
