@@ -16,8 +16,6 @@ const port = 3000;
 app.use(bodyParser.json());
 
   
-
-
 const secretKey = process.env.JWT_SECRET;
 if (!secretKey) {
     console.error('❌ JWT_SECRET is not defined in .env file');
@@ -47,8 +45,8 @@ const upload = multer({ storage: storage });
 const connection = mysql.createConnection({
     host: 'localhost',
     user: 'root',
-    password: '',
-    database: '111'
+    password: '12345',
+    database: '102'
 });
 
 connection.connect(err => {
@@ -837,10 +835,6 @@ app.post('/api/chat/send', (req, res) => {
         res.status(201).json({ message: 'Message sent successfully', message_id: result.insertId });
     });
 });
-
-
-
-
 
 
 
