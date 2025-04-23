@@ -16,8 +16,6 @@ const port = 3000;
 app.use(bodyParser.json());
 
   
-
-
 const secretKey = process.env.JWT_SECRET;
 if (!secretKey) {
     console.error('❌ JWT_SECRET is not defined in .env file');
@@ -61,8 +59,8 @@ const upload = multer({ storage: storage });
 // ✅ MySQL Connection
 const connection = mysql.createConnection({
     host: 'localhost',
-    user: 'project',
-    password: '1234',
+    user: 'root',
+    password: '12345',
     database: '102'
 });
 
@@ -470,9 +468,9 @@ app.get('/api/projects', (req, res) => {
 });
   
 // ดึงข้อมูลโปรเจคตาม ID
-app.get('/api/projects/:project_id', (req, res) => {
-    const {  project_id } = req.params;
-    connection.query('SELECT * FROM project WHERE project_id = ?', [project_id], (err, results) => {
+app.get('/api/projects/:id', (req, res) => {
+    const { id } = req.params;
+    connection.query('SELECT * FROM project WHERE project_id = ?', [id], (err, results) => {
       if (err) {
         console.error('Error fetching project:', err);
         return res.status(500).json({ error: 'Failed to fetch project' });
@@ -503,20 +501,16 @@ app.put('/api/projects/:project_id', async (req, res) => {
     const { project_id } = req.params;
     const { status } = req.body;
   
-    const sql = 'UPDATE project SET status = ? WHERE project_id = ?';
-
-    connection.query(sql, [status, project_id], (err, result) => {
-      if (err) {
-        console.error('Error updating status:', err);
-        return res.status(500).json({ error: 'Failed to update status' });
-      }
-  
-      if (result.affectedRows === 0) {
-        return res.status(404).json({ error: 'Project not found' });
-      }
-  
+    try {
+      const result = await pool.query(
+        'UPDATE project SET status = ? WHERE project_id = ?',
+        [status, project_id]
+      );
       res.status(200).json({ message: 'Project status updated successfully' });
-    });
+    } catch (error) {
+      console.error('Error updating status:', error);
+      res.status(500).json({ error: 'Failed to update status' });
+    }
   });
   
 // ➕ สร้างโปรเจค
@@ -573,7 +567,7 @@ app.put('/api/projects/:project_id', (req, res) => {
 
     connection.query(sql, values, (err, result) => {
         if (err) {
-            console.error('Error updating project:', err.message, err.sqlMessage);
+            console.error('Error updating project:', err);
             return res.status(500).json({ error: 'Failed to update project' });
         }
         if (result.affectedRows === 0) {
@@ -605,55 +599,60 @@ app.delete('/api/projects/:project_id', (req, res) => {
 
 // API สำหรับอัปโหลดไฟล์
 app.post('/api/files', upload.single('file'), (req, res) => {
-    const { file } = req;
-  
-    if (!file) {
-      return res.status(400).json({ error: 'No file uploaded' });
-    }
-  
-    // Save file info to the database (optional)
-    const sql = "INSERT INTO file (file_name, file_size, project_id, folder_id) VALUES (?, ?, ?, ?)";
-    const projectId = req.body.project_id;
-    const folderId = req.body.folder_id || null;
-    connection.query(sql, [file.filename, file.size, projectId, folderId], (err, result) => {
-      if (err) {
-        console.error("Database error:", err);
-        return res.status(500).json({ error: 'Error saving file info to database' });
-      }
-      console.log("Uploaded file:", file);
-      res.status(200).json({ message: 'File uploaded successfully', file: file });
-    });
-  });
-  
-  
+  const { file } = req;
 
-app.post('/api/files', (req, res) => {
-  upload(req, res, (err) => {
+  if (!file) {
+    return res.status(400).json({ error: 'No file uploaded' });
+  }
+
+  // Save file info to the database (optional)
+  const sql = "INSERT INTO file (file_name, file_size, project_id, folder_id) VALUES (?, ?, ?, ?)";
+  const projectId = req.body.project_id;
+  const folderId = req.body.folder_id || null;
+  
+  connection.query(sql, [file.filename, file.size, projectId, folderId], (err, result) => {
     if (err) {
-      console.error('Multer error:', err);
-      return res.status(500).json({ error: 'Error uploading file', details: err.message });
+      console.error("Database error:", err);
+      return res.status(500).json({ error: 'Error saving file info to database' });
     }
-
-    // หากอัปโหลดไฟล์สำเร็จ
-    const file = req.file;
-    console.log('File uploaded:', file);
-
-    if (!file) {
-      return res.status(400).json({ error: 'No file selected or invalid file' });
-    }
-
-    const sql = "INSERT INTO file (file_name, file_size) VALUES (?, ?)";
-    connection.query(sql, [file.filename, file.size], (err, result) => {
-      if (err) {
-        console.error("Database error:", err);
-        return res.status(500).json({ error: 'Error saving file info to database' });
-      }
-      res.status(200).json({ message: 'File uploaded successfully', file: file });
-    });
+    console.log("Uploaded file:", file);
+    res.status(200).json({ message: 'File uploaded successfully', file: file });
   });
 });
 
   
+  
+
+app.post('/api/files', upload.single('file'), (req, res) => {
+  const { file } = req;
+
+  if (!file) {
+    return res.status(400).json({ error: 'No file uploaded' });
+  }
+
+  // เก็บข้อมูลเวลาในการอัปโหลด
+  const uploadDate = new Date(); // ใช้ `new Date()` เพื่อเก็บวันที่ปัจจุบัน
+
+  // เพิ่มข้อมูลในฐานข้อมูลรวมทั้งเวลาที่อัปโหลด
+  const sql = `
+    INSERT INTO file (file_name, file_type, file_size, upload_date, uploaded_by, project_id, folder_id) 
+    VALUES (?, ?, ?, ?, ?, ?, ?)
+  `;
+  
+  const uploadedBy = req.body.uploaded_by || null; // ตรวจสอบผู้ที่อัปโหลด
+  const projectId = req.body.project_id;
+  const folderId = req.body.folder_id || null;
+  
+  connection.query(sql, [file.filename, file.mimetype, file.size, uploadDate, uploadedBy, projectId, folderId], (err, result) => {
+    if (err) {
+      console.error("Database error:", err);
+      return res.status(500).json({ error: 'Error saving file info to database' });
+    }
+    res.status(200).json({ message: 'File uploaded successfully', file: file });
+  });
+});
+
+
 
 
 app.get('/api/files/download/:file_id', (req, res) => {
@@ -836,10 +835,11 @@ app.get('/api/folders/project/:projectId', (req, res) => {
   });
 
   // /api/drive/:project_id?folder_id= (ถ้าไม่มี folder_id ให้แสดง root)
-app.get('/api/drive/:project_id', (req, res) => {
+  app.get('/api/drive/:project_id', (req, res) => {
     const { project_id } = req.params;
     const folder_id = req.query.folder_id || null;
   
+    // SQL query สำหรับดึงข้อมูลโฟลเดอร์
     const foldersSql = `
       SELECT 
         folder_id as id, 
@@ -852,6 +852,7 @@ app.get('/api/drive/:project_id', (req, res) => {
       WHERE project_id = ? AND parent_folder_id ${folder_id ? '= ?' : 'IS NULL'}
     `;
   
+    // SQL query สำหรับดึงข้อมูลไฟล์
     const filesSql = `
       SELECT 
         file_id as id, 
@@ -867,24 +868,29 @@ app.get('/api/drive/:project_id', (req, res) => {
     const folderValues = folder_id ? [project_id, folder_id] : [project_id];
     const fileValues = folder_id ? [project_id, folder_id] : [project_id];
   
+    // ดึงข้อมูลโฟลเดอร์
     connection.query(foldersSql, folderValues, (err, folderResults) => {
       if (err) return res.status(500).json({ error: 'Failed to fetch folders' });
   
+      // ดึงข้อมูลไฟล์
       connection.query(filesSql, fileValues, (err, fileResults) => {
         if (err) return res.status(500).json({ error: 'Failed to fetch files' });
   
-        // รวมผลลัพธ์
+        // รวมผลลัพธ์ของโฟลเดอร์และไฟล์
         const combined = [...folderResults, ...fileResults];
-        // sort: ให้ folder อยู่ก่อน แล้วตามด้วยไฟล์ (แบบเดียวกับ Google Drive)
+        
+        // จัดเรียงผลลัพธ์ (ให้โฟลเดอร์อยู่ก่อนแล้วตามด้วยไฟล์)
         combined.sort((a, b) => {
           if (a.type !== b.type) return a.type === 'folder' ? -1 : 1;
           return a.name.localeCompare(b.name);
         });
   
+        // ส่งผลลัพธ์กลับเป็น JSON
         res.json(combined);
       });
     });
   });
+  
   
   app.post('/api/folders', (req, res) => {
     const { folder_name, project_id, parent_folder_id } = req.body;
@@ -1147,51 +1153,181 @@ app.post('/api/chat/send', (req, res) => {
     });
 });
 
-//noti.js
-// db.js
-const mysql = require('mysql2/promise');
-
-const pool = mysql.createPool({
-  host: 'localhost',
-  user: 'your_user',
-  password: 'your_password',
-  database: 'your_database',
-});
-
-module.exports = pool;
-// routes/notifications.js
-const express = require('express');
-const router = express.Router();
-const db = require('../db');
-
-router.get('/', async (req, res) => {
-  try {
-    const [rows] = await db.execute(`
+// ✅ API: Notifications – เมื่อผู้ใช้ถูกเพิ่มเข้าโปรเจกต์
+app.get('/api/notifications', (req, res) => {
+    const sql = `
       SELECT 
+        u.user_id,
         CONCAT(u.firstname, ' ', u.lastname) AS user_fullname,
         u.role,
         d.department_name,
-        f.timestamp AS login_time
-      FROM file_logs f
-      JOIN user u ON f.user_id = u.user_id
+        ul.timestamp AS login_time
+      FROM user_logs ul
+      JOIN user u ON ul.user_id = u.user_id
       JOIN department d ON u.department_id = d.department_id
-      WHERE f.action = 'login'
-      ORDER BY f.timestamp DESC
-    `);
-
-    res.json(rows);
-  } catch (err) {
-    console.error('Error fetching login notifications:', err);
-    res.status(500).json({ error: 'Internal Server Error' });
-  }
-});
-
-module.exports = router;
-
-
-
+      WHERE ul.action = 'added to project'
+      ORDER BY ul.timestamp DESC
+    `;
+  
+    connection.query(sql, (err, results) => {
+      if (err) {
+        console.error('Database error:', err);
+        return res.status(500).json({ error: 'Database error' });
+      }
+      res.json(results);
+    });
+  });
   
 
+  // 📄 API สำหรับเพิ่มการแจ้งเตือน
+app.post('/api/notifications', (req, res) => {
+    const { userId, departmentId, message } = req.body;
+    const timestamp = new Date().toISOString();
+    const sql = `
+        INSERT INTO notifications (user_id, department_id, message, timestamp)
+        VALUES (?, ?, ?, ?)
+    `;
+
+    connection.query(sql, [userId, departmentId, message, timestamp], (err, results) => {
+        if (err) {
+            console.error('Database error:', err);
+            return res.status(500).json({ error: 'Database error' });
+        }
+        res.status(201).json({ message: 'Notification created successfully' });
+    });
+});
+
+// 📄 API สำหรับเพิ่มผู้ใช้ใหม่
+app.post('/api/users', (req, res) => {
+    const { username, firstname, lastname, email, role, department_id } = req.body;
+    const sql = `
+        INSERT INTO user (username, firstname, lastname, email, role, department_id)
+        VALUES (?, ?, ?, ?, ?, ?)
+    `;
+
+    connection.query(sql, [username, firstname, lastname, email, role, department_id], (err, results) => {
+        if (err) {
+            console.error('Database error:', err);
+            return res.status(500).json({ error: 'Database error' });
+        }
+
+        const userId = results.insertId; // get user_id of newly inserted user
+        const message = `${firstname} ${lastname} ถูกเพิ่มเข้าระบบ`; // สร้างข้อความแจ้งเตือน
+
+        // บันทึกการแจ้งเตือน
+        const notificationSql = `
+            INSERT INTO notifications (user_id, department_id, message, timestamp)
+            VALUES (?, ?, ?, ?)
+        `;
+        const timestamp = new Date().toISOString();
+        connection.query(notificationSql, [userId, department_id, message, timestamp], (err, notificationResults) => {
+            if (err) {
+                console.error('Error saving notification:', err);
+                return res.status(500).json({ error: 'Failed to save notification' });
+            }
+
+            res.status(201).json({ message: 'User added and notification sent' });
+        });
+    });
+});
+
+// เพิ่มในไฟล์หลักของคุณ (เช่น app.js หรือ server.js)
+app.get('/api/activity-logs', (req, res) => {
+    const query = `
+      SELECT l.id, u.username, l.action, l.timestamp, f.file_name
+      FROM (
+        SELECT id, user_id, action, timestamp, file_id FROM file_logs
+        UNION ALL
+        SELECT id, user_id, action, timestamp, NULL as file_id FROM user_logs
+      ) AS l
+      JOIN user u ON l.user_id = u.user_id
+      LEFT JOIN file f ON l.file_id = f.file_id
+      ORDER BY l.timestamp DESC
+    `;
+  
+    connection.query(query, (err, results) => {
+      if (err) {
+        console.error('Error fetching activity logs:', err);
+        return res.status(500).json({ error: 'Failed to fetch activity logs' });
+      }
+  
+      res.json(results);
+    });
+  });
+  
+  // 📄 backend/routes/activityLogs.js (หรือรวมไว้ในไฟล์หลักก็ได้)
+  app.get('/api/activity-logs', (req, res) => {
+      const sql = `
+          SELECT 
+              l.id,
+              u.username,
+              l.action,
+              f.file_name,
+              l.timestamp
+          FROM (
+              SELECT id, user_id, action, timestamp, NULL AS file_id FROM user_logs
+              UNION ALL
+              SELECT id, user_id, action, timestamp, file_id FROM file_logs
+          ) AS l
+          LEFT JOIN user u ON l.user_id = u.user_id
+          LEFT JOIN file f ON l.file_id = f.file_id
+          ORDER BY l.timestamp DESC
+          LIMIT 100
+      `;
+  
+      connection.query(sql, (err, results) => {
+          if (err) {
+              console.error('Error fetching activity logs:', err);
+              return res.status(500).json({ error: 'Internal server error' });
+          }
+  
+          res.json(results);
+      });
+  });
+
+  // ✅ เพิ่มบุ๊คมาร์ค
+app.post('/bookmark', (req, res) => {
+    const user_id = req.user.id;
+    const { item_id, item_type, project_id } = req.body;
+  
+    const sql = `
+      INSERT INTO bookmark (user_id, item_id, item_type, project_id)
+      VALUES (?, ?, ?, ?)
+      ON DUPLICATE KEY UPDATE bookmarked_at = CURRENT_TIMESTAMP
+    `;
+  
+    connection.query(sql, [user_id, item_id, item_type, project_id], (err, result) => {
+      if (err) return res.status(500).json({ error: err });
+      res.json({ message: 'Bookmarked successfully' });
+    });
+  });
+  
+  // 🗑️ ลบบุ๊คมาร์ค
+  app.delete('/bookmark', (req, res) => {
+    const user_id = req.user.id;
+    const { item_id, item_type } = req.body;
+  
+    const sql = `DELETE FROM bookmark WHERE user_id = ? AND item_id = ? AND item_type = ?`;
+    connection.query(sql, [user_id, item_id, item_type], (err, result) => {
+      if (err) return res.status(500).json({ error: err });
+      res.json({ message: 'Bookmark removed' });
+    });
+  });
+  
+  // 📄 ดึงบุ๊คมาร์คทั้งหมดของผู้ใช้
+  app.get('/bookmark',  (req, res) => {
+    const user_id = req.user.id;
+  
+    const sql = `
+      SELECT * FROM bookmark
+      WHERE user_id = ?
+      ORDER BY bookmarked_at DESC
+    `;
+    connection.query(sql, [user_id], (err, results) => {
+      if (err) return res.status(500).json({ error: err });
+      res.json(results);
+    });
+  });
 
 
 // 🚀 Start Server

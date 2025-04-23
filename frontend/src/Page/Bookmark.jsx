@@ -1,42 +1,38 @@
-import { useState, useEffect } from "react";
-import { useParams } from "react-router-dom";
+import { useEffect, useState } from "react";
 
 function Bookmark() {
-  const { id } = useParams(); // ดึง id จาก URL
-  const [bookmark, setBookmark] = useState(null);
+  const [bookmarks, setBookmarks] = useState([]);
 
   useEffect(() => {
-    fetch(`http://localhost:3000/api/bookmarks/${id}`)
+    fetch("http://localhost:3000/bookmark", {
+      credentials: "include",
+    })
       .then((res) => res.json())
-      .then((data) => setBookmark(data))
+      .then(setBookmarks)
       .catch((err) => console.error("Error fetching bookmark:", err));
-  }, [id]);
-
-  if (!bookmark) {
-    return <div>Loading...</div>;
-  }
+  }, []);
 
   return (
-    <div className="table-share">
-      <h1>Bookmark</h1>
-      <table style={{ width: "100%", borderCollapse: "collapse" }}>
+    <div className="table-share p-4 max-w-3xl mx-auto">
+      <h1 className="text-xl font-bold mb-4">⭐ Bookmark ของฉัน</h1>
+      <table className="w-full border-collapse text-sm">
         <thead>
-          <tr style={{ backgroundColor: "#f0f0f0" }}>
-            <th style={{ border: "1px solid #ccc", padding: "8px" }}>ชื่อ</th>
-            <th style={{ border: "1px solid #ccc", padding: "8px" }}>วันที่แชร์</th>
-            <th style={{ border: "1px solid #ccc", padding: "8px" }}>ประเภท</th>
-            <th style={{ border: "1px solid #ccc", padding: "8px" }}>สถานะ</th>
+          <tr className="bg-gray-100">
+            <th className="border px-4 py-2">ชื่อ</th>
+            <th className="border px-4 py-2">ประเภท</th>
+            <th className="border px-4 py-2">โปรเจกต์</th>
+            <th className="border px-4 py-2">วันที่บุ๊คมาร์ค</th>
           </tr>
         </thead>
         <tbody>
-          <tr>
-            <td style={{ border: "1px solid #ccc", padding: "8px" }}>{bookmark.name}</td>
-            <td style={{ border: "1px solid #ccc", padding: "8px" }}>{bookmark.dateShared}</td>
-            <td style={{ border: "1px solid #ccc", padding: "8px" }}>{bookmark.type}</td>
-            <td style={{ border: "1px solid #ccc", padding: "8px", color: bookmark.status === "เสร็จสิ้น" ? "green" : "red" }}>
-              {bookmark.status}
-            </td>
-          </tr>
+          {bookmarks.map((item) => (
+            <tr key={`${item.item_type}-${item.item_id}`} className="hover:bg-gray-50">
+              <td className="border px-4 py-2">{item.item_name || "(ไม่มีชื่อ)"}</td>
+              <td className="border px-4 py-2 capitalize">{item.item_type}</td>
+              <td className="border px-4 py-2">{item.project_id}</td>
+              <td className="border px-4 py-2">{new Date(item.bookmarked_at).toLocaleString()}</td>
+            </tr>
+          ))}
         </tbody>
       </table>
     </div>
