@@ -2,6 +2,7 @@ import { useState } from 'react';
 import './App.css';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 
+
 // Layout และหน้าต่าง ๆ
 import Layout from './component/Layout/Layout';
 import Home from './Page/Home';
@@ -12,6 +13,7 @@ import Login from './Login';
 import Projects from './Page/Projects';
 import Chat from './Page/Chat';
 import Dashboard from './Page/Dashboard';
+
 
 function App() {
   const [token, setToken] = useState(() => localStorage.getItem('token'));

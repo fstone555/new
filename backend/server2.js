@@ -836,6 +836,51 @@ app.post('/api/chat/send', (req, res) => {
     });
 });
 
+//noti.js
+// db.js
+const mysql = require('mysql2/promise');
+
+const pool = mysql.createPool({
+  host: 'localhost',
+  user: 'your_user',
+  password: 'your_password',
+  database: 'your_database',
+});
+
+module.exports = pool;
+// routes/notifications.js
+const express = require('express');
+const router = express.Router();
+const db = require('../db');
+
+router.get('/', async (req, res) => {
+  try {
+    const [rows] = await db.execute(`
+      SELECT 
+        CONCAT(u.firstname, ' ', u.lastname) AS user_fullname,
+        u.role,
+        d.department_name,
+        f.timestamp AS login_time
+      FROM file_logs f
+      JOIN user u ON f.user_id = u.user_id
+      JOIN department d ON u.department_id = d.department_id
+      WHERE f.action = 'login'
+      ORDER BY f.timestamp DESC
+    `);
+
+    res.json(rows);
+  } catch (err) {
+    console.error('Error fetching login notifications:', err);
+    res.status(500).json({ error: 'Internal Server Error' });
+  }
+});
+
+module.exports = router;
+
+
+
+  
+
 
 
 // 🚀 Start Server
