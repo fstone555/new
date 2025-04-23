@@ -16,6 +16,8 @@ const port = 3000;
 app.use(bodyParser.json());
 
   
+
+
 const secretKey = process.env.JWT_SECRET;
 if (!secretKey) {
     console.error('❌ JWT_SECRET is not defined in .env file');
@@ -59,8 +61,8 @@ const upload = multer({ storage: storage });
 // ✅ MySQL Connection
 const connection = mysql.createConnection({
     host: 'localhost',
-    user: 'root',
-    password: '12345',
+    user: 'project',
+    password: '1234',
     database: '102'
 });
 
@@ -468,9 +470,9 @@ app.get('/api/projects', (req, res) => {
 });
   
 // ดึงข้อมูลโปรเจคตาม ID
-app.get('/api/projects/:id', (req, res) => {
-    const { id } = req.params;
-    connection.query('SELECT * FROM project WHERE project_id = ?', [id], (err, results) => {
+app.get('/api/projects/:project_id', (req, res) => {
+    const {  project_id } = req.params;
+    connection.query('SELECT * FROM project WHERE project_id = ?', [project_id], (err, results) => {
       if (err) {
         console.error('Error fetching project:', err);
         return res.status(500).json({ error: 'Failed to fetch project' });
@@ -501,16 +503,20 @@ app.put('/api/projects/:project_id', async (req, res) => {
     const { project_id } = req.params;
     const { status } = req.body;
   
-    try {
-      const result = await pool.query(
-        'UPDATE project SET status = ? WHERE project_id = ?',
-        [status, project_id]
-      );
+    const sql = 'UPDATE project SET status = ? WHERE project_id = ?';
+
+    connection.query(sql, [status, project_id], (err, result) => {
+      if (err) {
+        console.error('Error updating status:', err);
+        return res.status(500).json({ error: 'Failed to update status' });
+      }
+  
+      if (result.affectedRows === 0) {
+        return res.status(404).json({ error: 'Project not found' });
+      }
+  
       res.status(200).json({ message: 'Project status updated successfully' });
-    } catch (error) {
-      console.error('Error updating status:', error);
-      res.status(500).json({ error: 'Failed to update status' });
-    }
+    });
   });
   
 // ➕ สร้างโปรเจค
@@ -567,7 +573,7 @@ app.put('/api/projects/:project_id', (req, res) => {
 
     connection.query(sql, values, (err, result) => {
         if (err) {
-            console.error('Error updating project:', err);
+            console.error('Error updating project:', err.message, err.sqlMessage);
             return res.status(500).json({ error: 'Failed to update project' });
         }
         if (result.affectedRows === 0) {
@@ -1141,137 +1147,51 @@ app.post('/api/chat/send', (req, res) => {
     });
 });
 
-// ✅ API: Notifications – เมื่อผู้ใช้ถูกเพิ่มเข้าโปรเจกต์
-app.get('/api/notifications', (req, res) => {
-    const sql = `
+//noti.js
+// db.js
+const mysql = require('mysql2/promise');
+
+const pool = mysql.createPool({
+  host: 'localhost',
+  user: 'your_user',
+  password: 'your_password',
+  database: 'your_database',
+});
+
+module.exports = pool;
+// routes/notifications.js
+const express = require('express');
+const router = express.Router();
+const db = require('../db');
+
+router.get('/', async (req, res) => {
+  try {
+    const [rows] = await db.execute(`
       SELECT 
-        u.user_id,
         CONCAT(u.firstname, ' ', u.lastname) AS user_fullname,
         u.role,
         d.department_name,
-        ul.timestamp AS login_time
-      FROM user_logs ul
-      JOIN user u ON ul.user_id = u.user_id
+        f.timestamp AS login_time
+      FROM file_logs f
+      JOIN user u ON f.user_id = u.user_id
       JOIN department d ON u.department_id = d.department_id
-      WHERE ul.action = 'added to project'
-      ORDER BY ul.timestamp DESC
-    `;
-  
-    connection.query(sql, (err, results) => {
-      if (err) {
-        console.error('Database error:', err);
-        return res.status(500).json({ error: 'Database error' });
-      }
-      res.json(results);
-    });
-  });
-  
+      WHERE f.action = 'login'
+      ORDER BY f.timestamp DESC
+    `);
 
-  // 📄 API สำหรับเพิ่มการแจ้งเตือน
-app.post('/api/notifications', (req, res) => {
-    const { userId, departmentId, message } = req.body;
-    const timestamp = new Date().toISOString();
-    const sql = `
-        INSERT INTO notifications (user_id, department_id, message, timestamp)
-        VALUES (?, ?, ?, ?)
-    `;
-
-    connection.query(sql, [userId, departmentId, message, timestamp], (err, results) => {
-        if (err) {
-            console.error('Database error:', err);
-            return res.status(500).json({ error: 'Database error' });
-        }
-        res.status(201).json({ message: 'Notification created successfully' });
-    });
+    res.json(rows);
+  } catch (err) {
+    console.error('Error fetching login notifications:', err);
+    res.status(500).json({ error: 'Internal Server Error' });
+  }
 });
 
-// 📄 API สำหรับเพิ่มผู้ใช้ใหม่
-app.post('/api/users', (req, res) => {
-    const { username, firstname, lastname, email, role, department_id } = req.body;
-    const sql = `
-        INSERT INTO user (username, firstname, lastname, email, role, department_id)
-        VALUES (?, ?, ?, ?, ?, ?)
-    `;
+module.exports = router;
 
-    connection.query(sql, [username, firstname, lastname, email, role, department_id], (err, results) => {
-        if (err) {
-            console.error('Database error:', err);
-            return res.status(500).json({ error: 'Database error' });
-        }
 
-        const userId = results.insertId; // get user_id of newly inserted user
-        const message = `${firstname} ${lastname} ถูกเพิ่มเข้าระบบ`; // สร้างข้อความแจ้งเตือน
 
-        // บันทึกการแจ้งเตือน
-        const notificationSql = `
-            INSERT INTO notifications (user_id, department_id, message, timestamp)
-            VALUES (?, ?, ?, ?)
-        `;
-        const timestamp = new Date().toISOString();
-        connection.query(notificationSql, [userId, department_id, message, timestamp], (err, notificationResults) => {
-            if (err) {
-                console.error('Error saving notification:', err);
-                return res.status(500).json({ error: 'Failed to save notification' });
-            }
+  
 
-            res.status(201).json({ message: 'User added and notification sent' });
-        });
-    });
-});
-
-// เพิ่มในไฟล์หลักของคุณ (เช่น app.js หรือ server.js)
-app.get('/api/activity-logs', (req, res) => {
-    const query = `
-      SELECT l.id, u.username, l.action, l.timestamp, f.file_name
-      FROM (
-        SELECT id, user_id, action, timestamp, file_id FROM file_logs
-        UNION ALL
-        SELECT id, user_id, action, timestamp, NULL as file_id FROM user_logs
-      ) AS l
-      JOIN user u ON l.user_id = u.user_id
-      LEFT JOIN file f ON l.file_id = f.file_id
-      ORDER BY l.timestamp DESC
-    `;
-  
-    connection.query(query, (err, results) => {
-      if (err) {
-        console.error('Error fetching activity logs:', err);
-        return res.status(500).json({ error: 'Failed to fetch activity logs' });
-      }
-  
-      res.json(results);
-    });
-  });
-  
-  // 📄 backend/routes/activityLogs.js (หรือรวมไว้ในไฟล์หลักก็ได้)
-  app.get('/api/activity-logs', (req, res) => {
-      const sql = `
-          SELECT 
-              l.id,
-              u.username,
-              l.action,
-              f.file_name,
-              l.timestamp
-          FROM (
-              SELECT id, user_id, action, timestamp, NULL AS file_id FROM user_logs
-              UNION ALL
-              SELECT id, user_id, action, timestamp, file_id FROM file_logs
-          ) AS l
-          LEFT JOIN user u ON l.user_id = u.user_id
-          LEFT JOIN file f ON l.file_id = f.file_id
-          ORDER BY l.timestamp DESC
-          LIMIT 100
-      `;
-  
-      connection.query(sql, (err, results) => {
-          if (err) {
-              console.error('Error fetching activity logs:', err);
-              return res.status(500).json({ error: 'Internal server error' });
-          }
-  
-          res.json(results);
-      });
-  });
 
 
 // 🚀 Start Server

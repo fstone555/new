@@ -2,7 +2,6 @@ import { useState } from 'react';
 import './App.css';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 
-
 // Layout และหน้าต่าง ๆ
 import Layout from './component/Layout/Layout';
 import Home from './Page/Home';
@@ -13,8 +12,6 @@ import Login from './Login';
 import Projects from './Page/Projects';
 import Chat from './Page/Chat';
 import Dashboard from './Page/Dashboard';
-import History from './Page/History';
-import ProjectDetail from './Page/ProjectDetail'
 
 
 function App() {
@@ -42,9 +39,7 @@ function App() {
           <Route path="/setting" element={<Setting />} />
           <Route path="/dashboard" element={<Dashboard />} />
           <Route path="/projects/:departmentId" element={<Projects />} />
-          <Route path="/projects/detail/:projectId" element={<ProjectDetail />} />
-          <Route path="/chat" element={<Chat />} />
-          <Route path="/history" element={<History/>} />
+          <Route path="/chat" element={<Chat />} /> {/* ✅ ใส่ route แชตตรงนี้ */}
         </Route>
       </Routes>
     </Router>
