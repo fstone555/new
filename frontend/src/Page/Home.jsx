@@ -1,11 +1,18 @@
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import './Home.css';
+import Modal from './Modal';  // นำเข้า Modal Component
+import { SlOptions } from "react-icons/sl";
+
 
 function Home() {
     const [departments, setDepartments] = useState([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
+    const [isModalOpen, setIsModalOpen] = useState(false);
+    const [selectedDepartmentId, setSelectedDepartmentId] = useState(null);
+
+    const role = localStorage.getItem('role');
 
     // ฟังก์ชันเพื่อดึงข้อมูลแผนกจาก API
     useEffect(() => {
@@ -23,6 +30,15 @@ function Home() {
         };
         fetchDepartments();
     }, []);
+
+    const handleManageUsers = (departmentId) => {
+        setSelectedDepartmentId(departmentId);  // เลือกแผนกที่ต้องการจัดการ
+        setIsModalOpen(true);  // เปิด Modal
+    };
+
+    const handleCloseModal = () => {
+        setIsModalOpen(false);  // ปิด Modal
+    };
 
     return (
         <div className="home-container">
@@ -45,12 +61,21 @@ function Home() {
                             <Link to={`/projects/${department.department_id}`} className="department-link">
                                 {department.department_name}
                             </Link>
+
+                            {role === 'admin' && (
+                                <button className='manage-btn' onClick={() => handleManageUsers(department.department_id)}>
+                                    <SlOptions />
+                                </button>
+                            )}
                         </div>
                     ))
                 ) : (
                     <p>No departments found.</p>
                 )}
             </div>
+
+            {/* แสดง Modal เมื่อเปิด */}
+            <Modal isOpen={isModalOpen} onClose={handleCloseModal} departmentId={selectedDepartmentId} />
         </div>
     );
 }

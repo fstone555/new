@@ -1,0 +1,43 @@
+.project-detail-container {
+    padding: 20px;
+  }
+  
+  .project-info h1 {
+    font-size: 2rem;
+    margin-bottom: 10px;
+  }
+  
+  .project-info p {
+    font-size: 1.1rem;
+    margin-bottom: 10px;
+  }
+  
+  .folders,
+  .files {
+    margin-top: 20px;
+  }
+  
+  .folders ul,
+  .files ul {
+    list-style: none;
+    padding: 0;
+  }
+  
+  .folders li,
+  .files li {
+    margin-bottom: 10px;
+  }
+  
+  button {
+    padding: 8px 12px;
+    background-color: #007bff;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+  }
+  
+  button:hover {
+    background-color: #0056b3;
+  }
+  
