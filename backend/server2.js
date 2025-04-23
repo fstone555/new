@@ -566,6 +566,28 @@ app.get('/api/files/user/:user_id', (req, res) => {
     });
 });
 
+//ดึง bookmark
+app.get('/api/bookmarks/:id', (req, res) => {
+    const { id } = req.params;
+  
+    connection.query(
+      'SELECT name, date_shared AS dateShared, type, status FROM bookmarks WHERE id = ?',
+      [id],
+      (err, results) => {
+        if (err) {
+          console.error('Error fetching bookmark:', err);
+          return res.status(500).json({ error: 'Failed to fetch bookmark' });
+        }
+  
+        if (results.length === 0) {
+          return res.status(404).json({ error: 'Bookmark not found' });
+        }
+  
+        res.json(results[0]);
+      }
+    );
+  });
+
 
 // 🚀 Start Server
 app.listen(port, () => {
