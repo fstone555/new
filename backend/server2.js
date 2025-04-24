@@ -15,7 +15,21 @@ const app = express();
 const port = 3000;
 app.use(bodyParser.json());
 
+const authenticate = (req, res, next) => {
+  const token = req.headers['authorization']?.split(' ')[1];
   
+  if (!token) return res.status(401).json({ error: 'Token not provided' });
+  
+  jwt.verify(token, SECRET_KEY, (err, decoded) => {
+    if (err) return res.status(401).json({ error: 'Invalid token' });
+    req.user = decoded;  // ใช้ข้อมูลผู้ใช้จาก decoded token
+    next();
+  });
+};
+
+app.use('/api/folders', authenticate);  // ใช้ middleware สำหรับตรวจสอบการอนุญาต  
+
+
 const secretKey = process.env.JWT_SECRET;
 if (!secretKey) {
     console.error('❌ JWT_SECRET is not defined in .env file');
@@ -891,19 +905,38 @@ app.get('/api/folders/project/:projectId', (req, res) => {
     });
   });
   
+// เพิ่ม middleware 'authenticateToken' ก่อนที่จะทำการสร้างโฟลเดอร์
+app.post('/api/folders', authenticateToken, (req, res) => {
+  const { folder_name, project_id, parent_folder_id } = req.body;
+
+  // ตรวจสอบว่า user ได้รับการยืนยันหรือไม่
+  if (!req.user || !req.user.id) {
+      return res.status(401).json({ error: 'Unauthorized access' });
+  }
+
+  // ตรวจสอบว่าได้รับข้อมูลที่จำเป็นหรือไม่
+  if (!folder_name || !project_id) {
+      return res.status(400).json({ error: 'Missing required fields' });
+  }
+
+  console.log("Received data:", req.body);
+  console.log("User ID:", req.user ? req.user.id : "No user data");
+
+  const sql = `
+      INSERT INTO folder (folder_name, project_id, parent_folder_id)
+      VALUES (?, ?, ?)
+  `;
   
-  app.post('/api/folders', (req, res) => {
-    const { folder_name, project_id, parent_folder_id } = req.body;
-    const sql = `
-      INSERT INTO folder (folder_name, project_id, parent_folder_id, created_at)
-      VALUES (?, ?, ?, NOW())
-    `;
-    connection.query(sql, [folder_name, project_id, parent_folder_id || null], (err, result) => {
-      if (err) return res.status(500).json({ error: 'Failed to create folder' });
+  // ใช้ query เพื่อเพิ่มโฟลเดอร์ใหม่
+  connection.query(sql, [folder_name, project_id, parent_folder_id || null], (err, result) => {
+      if (err) {
+          console.error("Database error:", err);
+          return res.status(500).json({ error: 'Failed to create folder' });
+      }
       res.status(201).json({ message: 'Folder created', folder_id: result.insertId });
-    });
   });
-  
+});
+
 
 //ดึง bookmark
 app.get('/api/bookmarks/:id', (req, res) => {

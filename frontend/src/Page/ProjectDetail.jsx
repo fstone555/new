@@ -1,7 +1,8 @@
 import React, { useEffect, useState } from 'react';
 import { useParams, useSearchParams, useNavigate } from 'react-router-dom';
 import { FiDownload } from "react-icons/fi";
-import { FaRegBookmark, FaBookmark  } from "react-icons/fa6";
+import { FaRegBookmark, FaBookmark } from "react-icons/fa6";
+import './ProjectDetail.css'
 
 function ProjectDetail() {
   const { projectId } = useParams();
@@ -25,7 +26,11 @@ function ProjectDetail() {
   const refreshItems = () => {
     fetch(`http://localhost:3000/api/drive/${projectId}${folderId ? `?folder_id=${folderId}` : ''}`)
       .then(res => res.json())
-      .then(setItems);
+      .then(data => {
+        const sorted = [...data].sort((a, b) => a.type.localeCompare(b.type));
+        setItems(sorted);
+      });
+
     fetchBookmarks();
   };
 
@@ -53,49 +58,69 @@ function ProjectDetail() {
 
     if (res.ok) {
       setFileToUpload(null);
+      document.querySelector('input[type="file"]').value = '';
       refreshItems();
+    } else {
+      alert("เกิดข้อผิดพลาดในการอัปโหลดไฟล์");
     }
   };
 
   const handleCreateFolder = async () => {
-    if (!folderName) return;
-
-    const res = await fetch("http://localhost:3000/api/folders", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        folder_name: folderName,
-        project_id: projectId,
-        parent_folder_id: folderId,
-      }),
-    });
-
-    if (res.ok) {
-      setFolderName("");
-      refreshItems();
+    const token = localStorage.getItem("token"); // 👈 เพิ่มบรรทัดนี้
+  
+    if (!token) {
+      console.error("No token found");
+      return;
+    }
+  
+    try {
+      const res = await fetch("http://localhost:3000/api/folders", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "Authorization": `Bearer ${token}`, // 👈 ใช้ token ที่ได้
+        },
+        body: JSON.stringify({
+          folder_name: folderName,
+          project_id: projectId,
+          parent_folder_id: folderId,
+        }),
+      });
+  
+      if (!res.ok) {
+        const text = await res.text();
+        console.error("Server error:", text);
+        return;
+      }
+  
+      const data = await res.json();
+      console.log("Success:", data);
+      refreshItems(); // โหลดรายการใหม่
+      setFolderName(""); // ล้างชื่อโฟลเดอร์
+    } catch (error) {
+      console.error("Network error:", error.message);
     }
   };
+  
+   
 
   const handleBookmark = async (item) => {
     const key = `${item.type}-${item.id}`;
     const isBookmarked = bookmarkedIds.includes(key);
 
-    const url = 'http://localhost:3000/bookmark';
-    const method = isBookmarked ? 'DELETE' : 'POST';
-    const body = JSON.stringify({
-      item_id: item.id,
-      item_type: item.type,
-      project_id: projectId,
-    });
-
-    const res = await fetch(url, {
-      method,
+    const res = await fetch('http://localhost:3000/bookmark', {
+      method: isBookmarked ? 'DELETE' : 'POST',
       headers: { "Content-Type": "application/json" },
       credentials: 'include',
-      body,
+      body: JSON.stringify({
+        item_id: item.id,
+        item_type: item.type,
+        project_id: projectId,
+      }),
     });
 
     if (res.ok) fetchBookmarks();
+    else alert("ไม่สามารถทำรายการบุ๊กมาร์กได้");
   };
 
   const handleOpenFolder = (id) => setSearchParams({ folder_id: id });
@@ -103,11 +128,11 @@ function ProjectDetail() {
   const formatDate = (isoDate) => {
     if (!isoDate) return "-";
     const date = new Date(isoDate);
-    return date.toLocaleString(); // ex: 24/4/2025, 14:00
+    return date.toLocaleString();
   };
 
   return (
-    <div className="p-4 max-w-5xl mx-auto">
+    <div className='project-detailcontainer'>
       <h2 className="text-xl font-bold mb-4">📁 Project Drive</h2>
 
       <div className="flex flex-wrap gap-3 items-center mb-6">
@@ -134,8 +159,10 @@ function ProjectDetail() {
             return (
               <tr key={`${item.type}-${item.id}`} className="hover:bg-gray-50">
                 <td className="px-4 py-2 border">
-                  <span onClick={() => item.type === 'folder' && handleOpenFolder(item.id)} className={item.type === 'folder' ? 'text-blue-600 hover:underline cursor-pointer' : ''}>
-                    {item.name}
+                  <span
+                    onClick={() => item.type === 'folder' && handleOpenFolder(item.id)}
+                    className={item.type === 'folder' ? 'text-blue-600 hover:underline cursor-pointer' : ''}>
+                    {item.type === 'folder' ? '📁' : '📄'} {item.name}
                   </span>
                 </td>
                 <td className="px-4 py-2 border capitalize">{item.type}</td>

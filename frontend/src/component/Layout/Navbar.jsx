@@ -25,9 +25,17 @@ const Navbar = ({ logout }) => {
         <li><Link to="/chat" className={location.pathname === '/chat' ? 'active' : ''}><FiMessageSquare /> <span>Chat</span></Link></li>
         <li><Link to="/bookmark" className={location.pathname === '/bookmark' ? 'active' : ''}><FiBookmark /> <span>Bookmarks</span></Link></li>
         <li><Link to="/noti" className={location.pathname === '/noti' ? 'active' : ''}><FiBell /> <span>Notifications</span></Link></li>
+
+        {user && user.role === 'admin' && (
         <li><Link to="/setting" className={location.pathname === '/setting' ? 'active' : ''}><FiSettings /> <span>Settings</span></Link></li>
-        <li><Link to="/dashboard" className={location.pathname === '/dashboard' ? 'active' : ''}><FiGrid /> <span>Dashboard</span></Link></li>
+        )}
+        {/* เฉพาะ admin สามารถเห็นลิงก์ Dashboard */}
+        {user && user.role === 'admin' && (
+          <li><Link to="/dashboard" className={location.pathname === '/dashboard' ? 'active' : ''}><FiGrid /> <span>Dashboard</span></Link></li>
+        )}
+        {user && user.role === 'admin' && (
         <li><Link to="/history" className={location.pathname === '/history' ? 'active' : ''}><GrHistory /> <span>History</span></Link></li>
+        )}
       </ul>
 
       <div className="bottom-section">
