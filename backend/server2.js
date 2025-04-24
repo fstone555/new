@@ -679,10 +679,41 @@ app.post('/api/projects/:projectId/add-user', async (req, res) => {
   }
 });
 
+// สมมุติว่า route นี้อยู่ใน server.js หรือ controller
+app.delete('/api/projects/:projectId/users/:userId', async (req, res) => {
+  const { projectId, userId } = req.params;
 
+  try {
+    const db = connection.promise();
 
+    // ตรวจสอบก่อนว่าผู้ใช้อยู่ในโปรเจกต์จริงไหม
+    const [existing] = await db.query(
+      'SELECT * FROM user_project WHERE user_id = ? AND project_id = ?',
+      [userId, projectId]
+    );
 
+    if (existing.length === 0) {
+      return res.status(404).json({ message: 'ไม่พบผู้ใช้นี้ในโปรเจกต์' });
+    }
 
+    // ลบออกจากโปรเจกต์
+    await db.query(
+      'DELETE FROM user_project WHERE user_id = ? AND project_id = ?',
+      [userId, projectId]
+    );
+
+    // บันทึก log
+    await db.query(
+      'INSERT INTO user_logs (user_id, action, project_id, timestamp) VALUES (?, ?, ?, NOW())',
+      [userId, 'removed from project', projectId]
+    );
+
+    res.json({ message: 'ลบผู้ใช้ออกจากโปรเจกต์เรียบร้อยแล้ว' });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ message: 'เกิดข้อผิดพลาดภายในเซิร์ฟเวอร์' });
+  }
+});
 
 
 

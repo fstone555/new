@@ -12,29 +12,26 @@ const Modal = ({ isOpen, onClose, departmentId, projectId }) => {
     const [searchTerm, setSearchTerm] = useState('');
     const role = localStorage.getItem('role');
 
+    // โหลดผู้ใช้ในแผนก
     useEffect(() => {
         if (departmentId) {
-            const fetchDepartmentUsers = async () => {
-                try {
-                    const response = await fetch(`http://localhost:3000/api/departments/${departmentId}/users`);
-                    const data = await response.json();
-                    setDepartmentUsers(data);
-                } catch {
-                    setError('ไม่สามารถโหลดรายชื่อผู้ใช้ในแผนกได้');
-                }
-            };
-            fetchDepartmentUsers();
+            fetch(`http://localhost:3000/api/departments/${departmentId}/users`)
+                .then(res => res.json())
+                .then(setDepartmentUsers)
+                .catch(() => setError('ไม่สามารถโหลดรายชื่อผู้ใช้ในแผนกได้'));
         }
     }, [departmentId]);
 
+    // โหลดสมาชิกที่มี/ไม่มีในโปรเจกต์
     useEffect(() => {
         if (projectId) {
-            const fetchAvailableUsers = async () => {
+            const fetchUsers = async () => {
                 try {
-                    const res1 = await fetch(`http://localhost:3000/api/projects/${projectId}/available-users`);
-                    const res2 = await fetch(`http://localhost:3000/api/projects/${projectId}/users`);
-                    const data1 = await res1.json();
-                    const data2 = await res2.json();
+                    const [res1, res2] = await Promise.all([
+                        fetch(`http://localhost:3000/api/projects/${projectId}/available-users`),
+                        fetch(`http://localhost:3000/api/projects/${projectId}/users`)
+                    ]);
+                    const [data1, data2] = await Promise.all([res1.json(), res2.json()]);
                     setAvailableUsers(data1);
                     setProjectMembers(data2);
                 } catch {
@@ -43,7 +40,7 @@ const Modal = ({ isOpen, onClose, departmentId, projectId }) => {
                     setLoading(false);
                 }
             };
-            fetchAvailableUsers();
+            fetchUsers();
         }
     }, [projectId]);
 
@@ -57,29 +54,25 @@ const Modal = ({ isOpen, onClose, departmentId, projectId }) => {
     };
 
     const handleAddUserToProject = async () => {
-        if (selectedUser) {
-            try {
-                console.log("Adding user with ID:", selectedUser);
-                const res = await fetch(`http://localhost:3000/api/projects/${projectId}/add-user`, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ userId: selectedUser }),
-                });
-                const result = await res.json();
-                alert(result.message);
-                setSelectedUser(null);
-                await reloadUsers();
-            } catch (err) {
-                console.error('Error adding user:', err);
-                alert('เกิดข้อผิดพลาดในการเพิ่มสมาชิก');
-            }
+        if (!selectedUser) return;
+        try {
+            const res = await fetch(`http://localhost:3000/api/projects/${projectId}/add-user`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ userId: selectedUser }),
+            });
+            const result = await res.json();
+            alert(result.message);
+            setSelectedUser(null);
+            await reloadUsers();
+        } catch (err) {
+            console.error(err);
+            alert('เกิดข้อผิดพลาดในการเพิ่มสมาชิก');
         }
     };
-    
 
     const handleRemoveUserFromProject = async (userId) => {
         if (!window.confirm('คุณแน่ใจหรือไม่ว่าต้องการลบผู้ใช้นี้ออกจากโปรเจกต์?')) return;
-
         try {
             const res = await fetch(`http://localhost:3000/api/projects/${projectId}/users/${userId}`, {
                 method: 'DELETE',
@@ -171,7 +164,9 @@ const Modal = ({ isOpen, onClose, departmentId, projectId }) => {
 
                 {selectedUser && (
                     <div className="add-user-to-project">
-                        <button onClick={handleAddUserToProject}>ยืนยันการเพิ่มสมาชิกในโปรเจกต์</button>
+                        <button onClick={handleAddUserToProject}>
+                            ยืนยันการเพิ่มสมาชิกในโปรเจกต์
+                        </button>
                     </div>
                 )}
             </div>
