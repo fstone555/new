@@ -1,8 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, Link, useNavigate } from 'react-router-dom';
 import './Projects.css';
-import { SlOptions } from "react-icons/sl";  // นำเข้าไอคอนสำหรับจัดการ
-import Modal from './Modal';  // นำเข้า Modal Component
+import { SlOptions } from "react-icons/sl";
+import Modal from './Modal';
 
 function Projects() {
   const { departmentId } = useParams();
@@ -13,10 +13,8 @@ function Projects() {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [selectedProjectId, setSelectedProjectId] = useState(null);
   const navigate = useNavigate();
-
   const role = localStorage.getItem('role');
 
-  // ดึงข้อมูลแผนก
   useEffect(() => {
     const fetchDepartment = async () => {
       try {
@@ -33,7 +31,6 @@ function Projects() {
     fetchDepartment();
   }, [departmentId]);
 
-  // ดึงข้อมูลโปรเจกต์
   useEffect(() => {
     const fetchProjects = async () => {
       try {
@@ -52,8 +49,7 @@ function Projects() {
     fetchProjects();
   }, [departmentId]);
 
-  // ฟังก์ชันจัดการโปรเจกต์
-  async function handleDelete(projectId) {
+  const handleDelete = async (projectId) => {
     if (window.confirm('Are you sure you want to delete this project?')) {
       try {
         const response = await fetch(`http://localhost:3000/api/projects/${projectId}`, {
@@ -65,19 +61,43 @@ function Projects() {
         console.error('Error deleting project:', error);
       }
     }
-  }
+  };
 
   const handleRowClick = (projectId) => {
     navigate(`/projects/detail/${projectId}`);
   };
 
   const handleManageUsers = (projectId) => {
-    setSelectedProjectId(projectId);  // เลือกโปรเจกต์ที่ต้องการจัดการ
-    setIsModalOpen(true);  // เปิด Modal
+    setSelectedProjectId(projectId);
+    setIsModalOpen(true);
   };
 
   const handleCloseModal = () => {
-    setIsModalOpen(false);  // ปิด Modal
+    setIsModalOpen(false);
+  };
+
+  const handleStatusChange = async (projectId, newStatus) => {
+    try {
+      const response = await fetch(`http://localhost:3000/api/projects/${projectId}/status`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ status: newStatus }),
+      });
+
+      if (!response.ok) throw new Error('Failed to update status');
+      setProjects(prev =>
+        prev.map(project =>
+          project.project_id === projectId
+            ? { ...project, status: newStatus }
+            : project
+        )
+      );
+    } catch (error) {
+      console.error('Error updating status:', error);
+      alert('ไม่สามารถเปลี่ยนสถานะได้');
+    }
   };
 
   if (loading) return <p>Loading projects...</p>;
@@ -91,6 +111,7 @@ function Projects() {
           <button className="create-btn">Create New Project</button>
         </Link>
       </div>
+
       <div className="table-wrapper">
         <table>
           <thead>
@@ -105,15 +126,27 @@ function Projects() {
             {projects.length > 0 ? (
               projects.map(project => (
                 <tr 
-                  key={project.project_id} 
+                  key={project.project_id}
                   className="clickable-row"
                   onClick={() => handleRowClick(project.project_id)}
                 >
                   <td>{project.project_name}</td>
                   <td>{project.description}</td>
-                  <td>{project.status || 'N/A'}</td>
+                  <td onClick={e => e.stopPropagation()}>
+                    {role === 'admin' ? (
+                      <select
+                        value={project.status || 'In Progress'}
+                        onChange={(e) => handleStatusChange(project.project_id, e.target.value)}
+                      >
+                        <option value="In Progress">In Progress</option>
+                        <option value="Completed">Completed</option>
+                        <option value="Cancelled">Cancelled</option>
+                      </select>
+                    ) : (
+                      project.status || 'N/A'
+                    )}
+                  </td>
                   <td onClick={(e) => e.stopPropagation()}>
-                    {/* แสดงปุ่มจัดการผู้ใช้สำหรับ admin */}
                     {role === 'admin' && (
                       <button onClick={() => handleManageUsers(project.project_id)} className="manage-btn">
                         <SlOptions />
@@ -140,8 +173,7 @@ function Projects() {
         </table>
       </div>
 
-      {/* แสดง Modal เมื่อเปิด */}
-      <Modal isOpen={isModalOpen} onClose={handleCloseModal} projectId={selectedProjectId} />
+      <Modal isOpen={isModalOpen} onClose={handleCloseModal} projectId={selectedProjectId} departmentId={departmentId} />
     </div>
   );
 }

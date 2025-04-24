@@ -715,6 +715,25 @@ app.delete('/api/projects/:projectId/users/:userId', async (req, res) => {
   }
 });
 
+// PUT /api/projects/:projectId/status
+app.put('/projects/:projectId/status', async (req, res) => {
+  const { projectId } = req.params;
+  const { status } = req.body;
+
+  const validStatuses = ['In Progress', 'Completed', 'Cancelled'];
+  if (!validStatuses.includes(status)) {
+    return res.status(400).json({ message: 'Invalid status value' });
+  }
+
+  try {
+    await connection.query('UPDATE project SET status = ? WHERE project_id = ?', [status, projectId]);
+    res.json({ message: 'Status updated successfully' });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ message: 'Database error while updating status' });
+  }
+});
+
 
 
 // ❌ ลบโปรเจค
