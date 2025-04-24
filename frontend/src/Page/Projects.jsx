@@ -1,6 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, Link, useNavigate } from 'react-router-dom';
 import './Projects.css';
+import { SlOptions } from "react-icons/sl";  // นำเข้าไอคอนสำหรับจัดการ
+import Modal from './Modal';  // นำเข้า Modal Component
 
 function Projects() {
   const { departmentId } = useParams();
@@ -8,8 +10,13 @@ function Projects() {
   const [departmentName, setDepartmentName] = useState('');
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [selectedProjectId, setSelectedProjectId] = useState(null);
   const navigate = useNavigate();
 
+  const role = localStorage.getItem('role');
+
+  // ดึงข้อมูลแผนก
   useEffect(() => {
     const fetchDepartment = async () => {
       try {
@@ -26,6 +33,7 @@ function Projects() {
     fetchDepartment();
   }, [departmentId]);
 
+  // ดึงข้อมูลโปรเจกต์
   useEffect(() => {
     const fetchProjects = async () => {
       try {
@@ -44,6 +52,7 @@ function Projects() {
     fetchProjects();
   }, [departmentId]);
 
+  // ฟังก์ชันจัดการโปรเจกต์
   async function handleDelete(projectId) {
     if (window.confirm('Are you sure you want to delete this project?')) {
       try {
@@ -60,6 +69,15 @@ function Projects() {
 
   const handleRowClick = (projectId) => {
     navigate(`/projects/detail/${projectId}`);
+  };
+
+  const handleManageUsers = (projectId) => {
+    setSelectedProjectId(projectId);  // เลือกโปรเจกต์ที่ต้องการจัดการ
+    setIsModalOpen(true);  // เปิด Modal
+  };
+
+  const handleCloseModal = () => {
+    setIsModalOpen(false);  // ปิด Modal
   };
 
   if (loading) return <p>Loading projects...</p>;
@@ -95,6 +113,12 @@ function Projects() {
                   <td>{project.description}</td>
                   <td>{project.status || 'N/A'}</td>
                   <td onClick={(e) => e.stopPropagation()}>
+                    {/* แสดงปุ่มจัดการผู้ใช้สำหรับ admin */}
+                    {role === 'admin' && (
+                      <button onClick={() => handleManageUsers(project.project_id)} className="manage-btn">
+                        <SlOptions />
+                      </button>
+                    )}
                     <Link to={`/projects/edit/${project.project_id}`}>
                       <button>Edit</button>
                     </Link>
@@ -115,6 +139,9 @@ function Projects() {
           </tbody>
         </table>
       </div>
+
+      {/* แสดง Modal เมื่อเปิด */}
+      <Modal isOpen={isModalOpen} onClose={handleCloseModal} projectId={selectedProjectId} />
     </div>
   );
 }

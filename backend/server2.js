@@ -526,6 +526,52 @@ app.put('/api/projects/:project_id', async (req, res) => {
       res.status(500).json({ error: 'Failed to update status' });
     }
   });
+
+  // ในไฟล์ server.js หรือ route ของโปรเจกต์
+// ดึงข้อมูลผู้ใช้ในโปรเจกต์
+// 📄 ดึงผู้ใช้ทั้งหมดในโปรเจกต์ที่ระบุ
+app.get('/api/projects/:projectId/users', (req, res) => {
+  const { projectId } = req.params;
+
+  const sql = `
+    SELECT u.user_id, u.username, u.firstname, u.lastname, u.email, u.role, u.department_id
+    FROM user u
+    JOIN user_project up ON u.user_id = up.user_id
+    WHERE up.project_id = ?
+  `;
+
+  connection.query(sql, [projectId], (err, results) => {
+    if (err) {
+      console.error('Database error:', err);
+      return res.status(500).json({ error: 'Database error' });
+    }
+    res.json(results);
+  });
+});
+
+app.get('/api/projects/:projectId/available-users', (req, res) => {
+  const { projectId } = req.params;
+
+  const sql = `
+    SELECT u.user_id, u.username, u.firstname, u.lastname, u.email, u.role, u.department_id
+    FROM user u
+    WHERE u.user_id NOT IN (
+      SELECT up.user_id
+      FROM user_project up
+      WHERE up.project_id = ?
+    )
+  `;
+
+  connection.query(sql, [projectId], (err, results) => {
+    if (err) {
+      console.error('Database error:', err);
+      return res.status(500).json({ error: 'Database error' });
+    }
+    res.json(results);
+  });
+});
+
+
   
 // ➕ สร้างโปรเจค
 app.post('/api/projects', (req, res) => {
@@ -590,6 +636,47 @@ app.put('/api/projects/:project_id', (req, res) => {
         res.json({ message: 'Project updated successfully' });
     });
 });
+
+// เพิ่มผู้ใช้เข้าโปรเจกต์
+// เพิ่มผู้ใช้เข้าโปรเจกต์
+app.post('/api/projects/:projectId/add-user', async (req, res) => {
+  const projectId = req.params.projectId;
+  const { userId } = req.body;
+
+  if (!userId) {
+    return res.status(400).json({ message: 'กรุณาระบุ userId' });
+  }
+
+  try {
+    const db = connection.promise(); // ⬅️ ใช้ promise wrapper
+
+    // ตรวจสอบว่าผู้ใช้นี้อยู่ในโปรเจกต์แล้วหรือยัง
+    const [existing] = await db.query(
+      'SELECT * FROM user_project WHERE user_id = ? AND project_id = ?',
+      [userId, projectId]
+    );
+
+    if (existing.length > 0) {
+      return res.status(409).json({ message: 'ผู้ใช้นี้อยู่ในโปรเจกต์แล้ว' });
+    }
+
+    // เพิ่มผู้ใช้เข้าโปรเจกต์
+    await db.query(
+      'INSERT INTO user_project (user_id, project_id) VALUES (?, ?)',
+      [userId, projectId]
+    );
+
+    res.json({ message: 'เพิ่มผู้ใช้เข้าโปรเจกต์เรียบร้อยแล้ว' });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ message: 'เกิดข้อผิดพลาดภายในเซิร์ฟเวอร์' });
+  }
+});
+
+
+
+
+
 
 
 // ❌ ลบโปรเจค
