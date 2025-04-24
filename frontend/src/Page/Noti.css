@@ -1,0 +1,125 @@
+.noti-container {
+    max-width: 768px;
+    margin: 0 auto;
+    padding: 2rem;
+    font-family: 'Segoe UI', sans-serif;
+    color: #333;
+  }
+  
+  .noti-header h2 {
+    font-size: 1.8rem;
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 1.5rem;
+  }
+  
+  .noti-badge {
+    background-color: crimson;
+    color: white;
+    font-size: 0.75rem;
+    padding: 2px 8px;
+    border-radius: 20px;
+    margin-left: 8px;
+  }
+  
+  .noti-empty {
+    text-align: center;
+    padding: 4rem 0;
+    color: #777;
+    font-size: 1rem;
+  }
+  
+  .noti-list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+  }
+  
+  .noti-item {
+    background-color: #fff;
+    border-radius: 12px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.06);
+    padding: 1.2rem;
+    margin-bottom: 1rem;
+    position: relative;
+    transition: background 0.3s;
+  }
+  
+  .noti-unread {
+    border-left: 5px solid #007bff;
+    background-color: #f9f9ff;
+  }
+  
+  .noti-top {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 0.3rem;
+  }
+  
+  .noti-user {
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+  
+  .role {
+    font-size: 0.85rem;
+    color: #888;
+  }
+  
+  .time {
+    font-size: 0.8rem;
+    color: #aaa;
+  }
+  
+  .department,
+  .project {
+    font-size: 0.9rem;
+    margin-top: 0.2rem;
+  }
+  
+  .project {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+  
+  .project-name {
+    font-weight: 600;
+    color: #007bff;
+  }
+  
+  .mark-read-btn {
+    position: absolute;
+    top: 12px;
+    right: 16px;
+    background: none;
+    border: none;
+    color: #007bff;
+    cursor: pointer;
+    font-size: 0.85rem;
+    display: flex;
+    align-items: center;
+    gap: 5px;
+  }
+  
+  .mark-read-btn:hover {
+    text-decoration: underline;
+  }
+  
+  .icon {
+    width: 24px;
+    height: 24px;
+    color: #007bff;
+  }
+  
+  .icon-small {
+    width: 16px;
+    height: 16px;
+    color: #555;
+  }
+  

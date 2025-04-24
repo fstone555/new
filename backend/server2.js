@@ -648,7 +648,7 @@ app.post('/api/projects/:projectId/add-user', async (req, res) => {
   }
 
   try {
-    const db = connection.promise(); // ⬅️ ใช้ promise wrapper
+    const db = connection.promise();
 
     // ตรวจสอบว่าผู้ใช้นี้อยู่ในโปรเจกต์แล้วหรือยัง
     const [existing] = await db.query(
@@ -666,12 +666,19 @@ app.post('/api/projects/:projectId/add-user', async (req, res) => {
       [userId, projectId]
     );
 
+    // ✅ บันทึกลง user_logs เพื่อให้ notification ไปแสดงผลได้
+    await db.query(
+      'INSERT INTO user_logs (user_id, action, project_id, timestamp) VALUES (?, ?, ?, NOW())',
+      [userId, 'added to project', projectId]
+    );
+
     res.json({ message: 'เพิ่มผู้ใช้เข้าโปรเจกต์เรียบร้อยแล้ว' });
   } catch (err) {
     console.error(err);
     res.status(500).json({ message: 'เกิดข้อผิดพลาดภายในเซิร์ฟเวอร์' });
   }
 });
+
 
 
 
@@ -1273,30 +1280,34 @@ app.post('/api/chat/send', (req, res) => {
     });
 });
 
-// ✅ API: Notifications – เมื่อผู้ใช้ถูกเพิ่มเข้าโปรเจกต์
+// ✅ API: Notifications – เมื่อผู้ใช้ถูกเพิ่มเข้าโปรเจกต์ (แสดงชื่อโปรเจกต์ด้วย)
 app.get('/api/notifications', (req, res) => {
-    const sql = `
-      SELECT 
-        u.user_id,
-        CONCAT(u.firstname, ' ', u.lastname) AS user_fullname,
-        u.role,
-        d.department_name,
-        ul.timestamp AS login_time
-      FROM user_logs ul
-      JOIN user u ON ul.user_id = u.user_id
-      JOIN department d ON u.department_id = d.department_id
-      WHERE ul.action = 'added to project'
-      ORDER BY ul.timestamp DESC
-    `;
-  
-    connection.query(sql, (err, results) => {
-      if (err) {
-        console.error('Database error:', err);
-        return res.status(500).json({ error: 'Database error' });
-      }
-      res.json(results);
-    });
+  const sql = `
+    SELECT 
+      u.user_id,
+      CONCAT(u.firstname, ' ', u.lastname) AS user_fullname,
+      u.role,
+      d.department_name,
+      p.project_name,
+      ul.timestamp
+    FROM user_logs ul
+    JOIN user u ON ul.user_id = u.user_id
+    JOIN department d ON u.department_id = d.department_id
+    JOIN project p ON ul.project_id = p.project_id
+    WHERE ul.action = 'added to project'
+    ORDER BY ul.timestamp DESC
+  `;
+
+  connection.query(sql, (err, results) => {
+    if (err) {
+      console.error('Database error:', err);
+      return res.status(500).json({ error: 'Database error' });
+    }
+    res.json(results);
   });
+});
+
+
   
 
   // 📄 API สำหรับเพิ่มการแจ้งเตือน
